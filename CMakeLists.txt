@@ -1,0 +1,130 @@
+cmake_minimum_required(VERSION 3.20)
+
+project(Kedge VERSION 0.0.2)
+
+# specify the C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
+
+option(build_shared "help string describing build_shared" OFF)
+
+if(NOT build_shared)
+	message(STATUS "use static build")
+	set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+	set(BUILD_SHARED_LIBS OFF)
+
+	set(Boost_USE_STATIC_LIBS        ON)
+	set(Boost_USE_STATIC_RUNTIME     ON)
+
+# include_directories( ${BOOST_ROOT}/include )
+	set(BOOST_ROOT "/opt/boost")
+	set(LT_ROOT "/opt/lt12")
+
+	include_directories( ${LT_ROOT}/include )
+	link_directories( ${LT_ROOT}/lib )
+
+	add_library(ZLIB::ZLIB STATIC IMPORTED)
+	add_library(torrent-rasterbar STATIC IMPORTED)
+else()
+	message(STATUS "use shared build")
+endif()
+
+set(Boost_USE_MULTITHREADED      ON)
+
+set(REQUIRED_BOOST_LIBRARIES
+    system
+    # filesystem
+    program_options
+    # date_time
+    json
+    # log_setup
+    # log
+    # iostreams
+    # timer
+    thread
+)
+
+find_package(Boost 1.76 REQUIRED COMPONENTS ${REQUIRED_BOOST_LIBRARIES})
+message(STATUS "Boost include dir: " ${Boost_INCLUDE_DIR})
+message(STATUS "Boost libraries: " ${Boost_LIBRARIES})
+
+configure_file(src/config.h.in ../src/config.h)
+include_directories(${PROJECT_BINARY_BIN})
+
+# include
+include_directories( "include" "src" ${Boost_INCLUDE_DIRS})
+
+# find_package(BZip2 REQUIRED)
+
+find_package(ZLIB REQUIRED)
+message(STATUS "ZLIB libraries: " ${ZLIB_LIBRARIES})
+
+set(sources
+	context.cpp
+	main.cpp
+	util.cpp)
+
+set(web_sources
+	listener.hpp
+	net.hpp
+	router.hpp
+	server.hpp
+	session.hpp
+	token.hpp)
+
+list(TRANSFORM sources PREPEND "src/")
+list(TRANSFORM web_sources PREPEND "src/web/")
+
+add_executable(kedge ${sources})
+
+# target_include_directories(kedge PUBLIC ${Boost_INCLUDE_DIR})
+# include_directories(${Boost_INCLUDE_DIRS})
+# target_link_libraries(torrent-rasterbar PUBLIC ${Boost_SYSTEM_LIBRARY})
+# target_link_libraries(kedge PUBLIC ${Boost_LIBRARIES})
+# target_link_libraries(kedge ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+
+if(NOT build_shared)
+	set_property(TARGET torrent-rasterbar PROPERTY IMPORTED_LOCATION ${LT_ROOT}/lib/libtorrent-rasterbar.a)
+
+	if(TARGET ZLIB::ZLIB)
+		set_property(TARGET ZLIB::ZLIB PROPERTY IMPORTED_LOCATION ${ZLIB_LIBRARIES})
+	endif()
+else()
+	find_package(LibtorrentRasterbar REQUIRED)
+endif()
+target_link_libraries(kedge PUBLIC ${Boost_LIBRARIES} torrent-rasterbar)
+
+find_package(OpenSSL REQUIRED)
+if(TARGET OpenSSL::SSL)
+	target_link_libraries(kedge PUBLIC OpenSSL::SSL)
+	target_compile_definitions(kedge PUBLIC TORRENT_USE_OPENSSL)
+endif()
+
+if(TARGET OpenSSL::Crypto)
+	target_link_libraries(kedge PUBLIC OpenSSL::Crypto)
+	target_compile_definitions(kedge PUBLIC TORRENT_USE_LIBCRYPTO)
+endif()
+
+# target_link_libraries(kedge PUBLIC ZLIB::ZLIB)
+target_link_libraries(kedge PUBLIC ${ZLIB_LIBRARIES})
+
+include(CheckCXXSymbolExists)
+check_cxx_symbol_exists(std::filesystem::path::preferred_separator filesystem cxx17fs)
+
+set(LLVM_STATIC_LINK_CXX_STDLIB ON)
+set(LLVM_ENABLE_LIBCXX ON)
+if (APPLE)
+	target_link_libraries(kedge PRIVATE "-framework CoreFoundation" "-framework SystemConfiguration" "-framework Security" )
+else()
+	# set(CMAKE_EXE_LINKER_FLAGS "-static")
+	# include_directories("/usr/include/c++/8")
+	target_link_libraries(kedge PRIVATE stdc++fs "-static-libgcc" "-static-libstdc++" "-ldl")
+endif()
+
+target_compile_features(kedge PUBLIC cxx_std_17)
+
+add_definitions(-DBOOST_BEAST_USE_STD_STRING_VIEW)
+# add_definitions(-DTORRENT_DISABLE_ALERT_MSG)
