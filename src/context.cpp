@@ -130,33 +130,33 @@ void
 tag_invoke( json::value_from_tag, json::value& jv, stats const& s )
 {
     json::object obj;
-    if (s.bytesRecv > 0) obj["bytesRecv"] = s.bytesRecv;
-    if (s.bytesSent > 0) obj["bytesSent"] = s.bytesSent;
-    if (s.bytesDataRecv > 0) obj["bytesDataRecv"] = s.bytesDataRecv;
-    if (s.bytesDataSent > 0) obj["bytesDataSent"] = s.bytesDataSent;
-    if (s.rateRecv > 0) obj["rateRecv"] = s.rateRecv;
-    if (s.rateSent > 0) obj["rateSent"] = s.rateSent;
-    if (s.bytesFailed > 0) obj["bytesFailed"] = s.bytesFailed;
-    if (s.bytesQueued > 0) obj["bytesQueued"] = s.bytesQueued;
-    if (s.bytesWasted > 0) obj["bytesWasted"] = s.bytesWasted;
-    if (s.numChecking > 0) obj["numChecking"] = s.numChecking;
-    if (s.numDownloading > 0) obj["numDownloading"] = s.numDownloading;
-    if (s.numSeeding > 0) obj["numSeeding"] = s.numSeeding;
-    if (s.numStopped > 0) obj["numStopped"] = s.numStopped;
-    if (s.numQueued > 0) obj["numQueued"] = s.numQueued;
-    if (s.numError > 0) obj["numError"] = s.numError;
-    if (s.numPeersConnected > 0) obj["numPeersConnected"] = s.numPeersConnected;
-    if (s.numPeersHalfOpen > 0) obj["numPeersHalfOpen"] = s.numPeersHalfOpen;
-    if (s.limitUpQueue > 0) obj["limitUpQueue"] = s.limitUpQueue;
-    if (s.limitDownQueue > 0) obj["limitDownQueue"] = s.limitDownQueue;
-    if (s.hasIncoming) obj["hasIncoming"] = true;
+    if (s.bytesRecv > 0) obj.emplace("bytesRecv", s.bytesRecv);
+    if (s.bytesSent > 0) obj.emplace("bytesSent", s.bytesSent);
+    if (s.bytesDataRecv > 0) obj.emplace("bytesDataRecv", s.bytesDataRecv);
+    if (s.bytesDataSent > 0) obj.emplace("bytesDataSent", s.bytesDataSent);
+    if (s.rateRecv > 0) obj.emplace("rateRecv", s.rateRecv);
+    if (s.rateSent > 0) obj.emplace("rateSent", s.rateSent);
+    if (s.bytesFailed > 0) obj.emplace("bytesFailed", s.bytesFailed);
+    if (s.bytesQueued > 0) obj.emplace("bytesQueued", s.bytesQueued);
+    if (s.bytesWasted > 0) obj.emplace("bytesWasted", s.bytesWasted);
+    if (s.numChecking > 0) obj.emplace("numChecking", s.numChecking);
+    if (s.numDownloading > 0) obj.emplace("numDownloading", s.numDownloading);
+    if (s.numSeeding > 0) obj.emplace("numSeeding", s.numSeeding);
+    if (s.numStopped > 0) obj.emplace("numStopped", s.numStopped);
+    if (s.numQueued > 0) obj.emplace("numQueued", s.numQueued);
+    if (s.numError > 0) obj.emplace("numError", s.numError);
+    if (s.numPeersConnected > 0) obj.emplace("numPeersConnected", s.numPeersConnected);
+    if (s.numPeersHalfOpen > 0) obj.emplace("numPeersHalfOpen", s.numPeersHalfOpen);
+    if (s.limitUpQueue > 0) obj.emplace("limitUpQueue", s.limitUpQueue);
+    if (s.limitDownQueue > 0) obj.emplace("limitDownQueue", s.limitDownQueue);
+    if (s.hasIncoming) obj.emplace("hasIncoming", true);
     int activeCount = s.numChecking + s.numDownloading + s.numSeeding;
     int puasedCount = s.numQueued + s.numStopped;
-    if (activeCount > 0) obj["activeCount"] = activeCount;
-    if (puasedCount > 0) obj["puasedCount"] = puasedCount;
-    obj["taskCount"] = activeCount + puasedCount;
-    if (s.uptime > 0) obj["uptime"] = s.uptime;
-    if (s.uptimeMs > 0) obj["uptimeMs"] = s.uptimeMs;
+    if (activeCount > 0) obj.emplace("activeCount", activeCount);
+    if (puasedCount > 0) obj.emplace("puasedCount", puasedCount);
+    obj.emplace("taskCount", activeCount + puasedCount);
+    if (s.uptime > 0) obj.emplace("uptime", s.uptime);
+    if (s.uptimeMs > 0) obj.emplace("uptimeMs", s.uptimeMs);
     jv = json::value(obj);
 }
 
@@ -164,62 +164,69 @@ json::object
 torrent_status_to_json_obj(lt::torrent_status const& st)
 {
     constexpr auto hr_min = high_resolution_clock::time_point::min();
-    json::object obj;
-    obj["state"] = st.state;
-    obj["save_path"] = st.save_path; // empty in get_torrent_status
-    obj["name"] = st.name; // empty in get_torrent_status
-    obj["info_hash"] = to_hex(st.info_hash);
-    obj["next_announce"] = duration_cast<seconds>(st.next_announce).count();
-    obj["active_duration"] = duration_cast<seconds>(st.active_duration).count();
+    json::object obj({
+          { "added_time", st.added_time }
+        , { "state", static_cast<int>(st.state) }
+        , { "save_path", st.save_path } // empty in get_torrent_status
+        , { "name", st.name }           // empty in get_torrent_status
+        , { "info_hash", to_hex(st.info_hash) }
+        , { "current_tracker", st.current_tracker  }
+        , { "next_announce", duration_cast<seconds>(st.next_announce).count() }
+        , { "active_duration", duration_cast<seconds>(st.active_duration).count() }
+        , { "is_finished", st.is_finished }
+        , { "progress", st.progress }
+        , { "progress_ppm", st.progress_ppm }
+    });
+    if (st.completed_time > 0) obj.emplace("completed_time", st.completed_time);
+
     auto finished_duration = duration_cast<seconds>(st.finished_duration).count();
-    if (finished_duration) obj["finished_duration"] = finished_duration;
+    if (finished_duration) obj.emplace("finished_duration", finished_duration);
     auto seeding_duration = duration_cast<seconds>(st.seeding_duration).count();
-    if (seeding_duration) obj["seeding_duration"] = seeding_duration;
-    obj["current_tracker"] = st.current_tracker;
-    if (st.total_download > 0) obj["total_download"] = st.total_download; // this session
-    if (st.total_upload > 0) obj["total_upload"] = st.total_upload; // this session
-    if (st.all_time_download > 0) obj["all_time_download"] = st.all_time_download;
-    if (st.all_time_upload > 0) obj["all_time_upload"] = st.all_time_upload;
-    if (st.total_payload_download > 0) obj["total_payload_download"] = st.total_payload_download; // this session
-    if (st.total_payload_upload > 0) obj["total_payload_upload"] = st.total_payload_upload; // this session
-    if (st.total_failed_bytes > 0) obj["total_failed_bytes"] = st.total_failed_bytes; // since last started
-    if (st.total_redundant_bytes > 0) obj["total_redundant_bytes"] = st.total_redundant_bytes;
-    if (st.total_done > 0) obj["total_done"] = st.total_done;
-    if (st.total > 0) obj["total"] = st.total; // zero
-    if (st.total_wanted_done > 0) obj["total_wanted_done"] = st.total_wanted_done;
-    if (st.total_wanted > 0) obj["total_wanted"] = st.total_wanted;
-    obj["added_time"] = st.added_time;
-    if (st.completed_time > 0) obj["completed_time"] = st.completed_time;
-    if (st.last_seen_complete > 0) obj["last_seen_complete"] = st.last_seen_complete;
-    if (st.last_download > hr_min) obj["last_download"] = duration_cast<seconds>(st.last_download.time_since_epoch()).count();
-    if (st.last_upload > hr_min) obj["last_upload"] = duration_cast<seconds>(st.last_upload.time_since_epoch()).count();
-    obj["progress"] = st.progress;
-    obj["progress_ppm"] = st.progress_ppm;
-    if (st.download_rate > 0) obj["download_rate"] = st.download_rate;
-    if (st.upload_rate > 0) obj["upload_rate"] = st.upload_rate;
-    if (st.download_payload_rate > 0) obj["download_payload_rate"] = st.download_payload_rate;
-    if (st.upload_payload_rate > 0) obj["upload_payload_rate"] = st.upload_payload_rate;
-    if (st.num_seeds > 0) obj["num_seeds"] = st.num_seeds;
-    if (st.num_peers > 0) obj["num_peers"] = st.num_peers;
-    if (st.num_complete > 0) obj["num_complete"] = st.num_complete;
-    if (st.num_incomplete > 0) obj["num_incomplete"] = st.num_incomplete;
-    if (st.list_seeds > 0) obj["list_seeds"] = st.list_seeds;
-    if (st.list_peers > 0) obj["list_peers"] = st.list_peers;
-    if (st.connect_candidates > 0) obj["connect_candidates"] = st.connect_candidates;
-    if (st.num_pieces > 0) obj["num_pieces"] = st.num_pieces; // zero
-    if (st.distributed_full_copies > 0) obj["distributed_full_copies"] = st.distributed_full_copies;
-    if (st.distributed_fraction > 0) obj["distributed_fraction"] = st.distributed_fraction;
-    if (st.block_size > 0) obj["block_size"] = st.block_size;
-    if (st.num_uploads > 0) obj["num_uploads"] = st.num_uploads;
-    if (st.num_connections > 0) obj["num_connections"] = st.num_connections;
-    if (st.moving_storage) obj["moving_storage"] = st.moving_storage;
-    obj["is_finished"] = st.is_finished;
-    if (st.is_seeding) obj["is_seeding"] = st.is_seeding;
-    if (st.has_metadata) obj["has_metadata"] = st.has_metadata;
-    if (st.has_incoming) obj["has_incoming"] = st.has_incoming;
+    if (seeding_duration) obj.emplace("seeding_duration", seeding_duration);
+
+    if (st.total_download > 0) obj.emplace("total_download", st.total_download); // this session
+    if (st.total_upload > 0) obj.emplace("total_upload", st.total_upload); // this session
+    if (st.all_time_download > 0) obj.emplace("all_time_download", st.all_time_download);
+    if (st.all_time_upload > 0) obj.emplace("all_time_upload", st.all_time_upload);
+    if (st.total_payload_download > 0) obj.emplace("total_payload_download", st.total_payload_download); // this session
+    if (st.total_payload_upload > 0) obj.emplace("total_payload_upload", st.total_payload_upload); // this session
+    if (st.total_failed_bytes > 0) obj.emplace("total_failed_bytes", st.total_failed_bytes); // since last started
+    if (st.total_redundant_bytes > 0) obj.emplace("total_redundant_bytes", st.total_redundant_bytes);
+    if (st.total_done > 0) obj.emplace("total_done", st.total_done);
+    if (st.total > 0) obj.emplace("total", st.total); // zero
+    if (st.total_wanted_done > 0) obj.emplace("total_wanted_done", st.total_wanted_done);
+    if (st.total_wanted > 0) obj.emplace("total_wanted", st.total_wanted);
+
+    if (st.last_seen_complete > 0) obj.emplace("last_seen_complete", st.last_seen_complete);
+    if (st.last_download > hr_min) obj.emplace("last_download", duration_cast<seconds>(st.last_download.time_since_epoch()).count());
+    if (st.last_upload > hr_min) obj.emplace("last_upload", duration_cast<seconds>(st.last_upload.time_since_epoch()).count());
+
+    if (st.download_rate > 0) obj.emplace("download_rate", st.download_rate);
+    if (st.upload_rate > 0) obj.emplace("upload_rate", st.upload_rate);
+    if (st.download_payload_rate > 0) obj.emplace("download_payload_rate", st.download_payload_rate);
+    if (st.upload_payload_rate > 0) obj.emplace("upload_payload_rate", st.upload_payload_rate);
+    if (st.num_seeds > 0) obj.emplace("num_seeds", st.num_seeds);
+    if (st.num_peers > 0) obj.emplace("num_peers", st.num_peers);
+    if (st.num_complete > 0) obj.emplace("num_complete", st.num_complete);
+    if (st.num_incomplete > 0) obj.emplace("num_incomplete", st.num_incomplete);
+    if (st.list_seeds > 0) obj.emplace("list_seeds", st.list_seeds);
+    if (st.list_peers > 0) obj.emplace("list_peers", st.list_peers);
+    if (st.connect_candidates > 0) obj.emplace("connect_candidates", st.connect_candidates);
+    if (st.num_pieces > 0) obj.emplace("num_pieces", st.num_pieces); // zero
+    if (st.distributed_full_copies > 0) obj.emplace("distributed_full_copies", st.distributed_full_copies);
+    if (st.distributed_fraction > 0) obj.emplace("distributed_fraction", st.distributed_fraction);
+    if (st.block_size > 0) obj.emplace("block_size", st.block_size);
+    if (st.num_uploads > 0) obj.emplace("num_uploads", st.num_uploads);
+    if (st.num_connections > 0) obj.emplace("num_connections", st.num_connections);
+    if (st.moving_storage) obj.emplace("moving_storage", st.moving_storage);
+
+    if (st.is_seeding) obj.emplace("is_seeding", st.is_seeding);
+    if (st.has_metadata) obj.emplace("has_metadata", st.has_metadata);
+    if (st.has_incoming) obj.emplace("has_incoming", st.has_incoming);
+
     if (st.errc)
     {
-        obj["errc"] = st.errc.value();
+        obj.emplace("errc", st.errc.value());
     }
     return std::move(obj);
 }
