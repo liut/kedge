@@ -12,6 +12,9 @@ namespace web {
 
 using namespace http;
 
+auto const hd_cache_control = "no-cache, no-store, must-revalidate";
+auto const hd_pragma = "no-cache";
+
 template<class Body>
 response<Body>
 make_resp(const request<Body>& req, typename Body::value_type body, beast::string_view ct, status sc = status::ok)
@@ -19,6 +22,8 @@ make_resp(const request<Body>& req, typename Body::value_type body, beast::strin
     response<string_body> res{ sc, req.version() };
     res.set(field::server, BOOST_BEAST_VERSION_STRING);
     res.set(field::content_type, ct);
+    res.set(field::cache_control, hd_cache_control);
+    res.set(field::pragma, hd_pragma);
     res.keep_alive(req.keep_alive());
     res.body() = body;
     res.prepare_payload();
@@ -32,7 +37,9 @@ make_resp_204(const request<Body>& req)
     response<string_body> res{ status::no_content, req.version() };
     res.set(field::server, BOOST_BEAST_VERSION_STRING);
     // res.set(field::content_type, ct);
-    // res.keep_alive(req.keep_alive());
+    res.set(field::cache_control, hd_cache_control);
+    res.set(field::pragma, hd_pragma);
+    res.keep_alive(req.keep_alive());
     // res.body() = body;
     res.prepare_payload();
     return res;
