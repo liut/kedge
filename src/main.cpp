@@ -185,6 +185,7 @@ int main(int argc, char* argv[])
             {
                 auto flag = context::query_basic;
                 if ("peers" == act) flag = context::query_peers;
+                else if ("files" == act) flag = context::query_files;
                 auto jv = ctx->get_torrent(ih, flag);
                 if (jv.is_null())
                 {
@@ -199,7 +200,7 @@ int main(int argc, char* argv[])
             }
 
 
-        }
+        } // torrent
         return make_resp<string_body>(req, "not found", CT_TEXT, status::not_found);
     });
     // TODO: routes

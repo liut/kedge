@@ -19,7 +19,6 @@ JSON APIs
 
 TODO
 ---
-* `GET` `/torrent/{infohash}/files` get files and progress
 * split logs with alert types
 
 

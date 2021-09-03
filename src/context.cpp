@@ -806,14 +806,64 @@ context::get_torrent(lt::sha1_hash const& ih, query_flags_t flags)
         th.get_peer_info(peers);
         for (std::vector<lt::peer_info>::const_iterator i = peers.begin(); i != peers.end(); ++i)
         {
-            json::object obj;
             lt::address const& addr = i->ip.address();
-            obj["ip"] = addr.to_string();
-            obj["port"] = i->ip.port();
-            obj["flag"] = i->flags;
-            if (i->flags & lt::peer_info::utp_socket) obj["uTP"] = true;
-            obj["progress"] = i->progress_ppm;
+            json::object obj({
+                 {"client", i->client}
+                ,{"ip", addr.to_string()}
+                ,{"ip", addr.to_string()}
+                ,{"port", i->ip.port()}
+                ,{"flag", static_cast<int>(i->flags)}
+                ,{"source", static_cast<int>(i->source)}
+                ,{"progress", i->progress_ppm}
+                ,{"down_speed", i->down_speed}
+                ,{"up_speed", i->up_speed}
+                ,{"num_pieces", i->num_pieces}
+            });
+            if (i->flags & lt::peer_info::utp_socket) obj.emplace("uTP", true);
             data.emplace_back(obj);
+        }
+        return json::value(std::move(data));
+    }
+
+    if (flags == query_files)
+    {
+        std::vector<std::int64_t> file_progress;
+        th.file_progress(file_progress);
+        std::vector<lt::open_file_state> file_status = th.file_status();
+        std::vector<lt::download_priority_t> file_prio = th.get_file_priorities();
+        auto f = file_status.begin();
+        std::shared_ptr<const lt::torrent_info> ti = th.torrent_file();
+
+        json::array data;
+
+        for (lt::file_index_t i(0); i < lt::file_index_t(ti->num_files()); ++i)
+        {
+            int const idx = static_cast<int>(i);
+            int const progress = ti->files().file_size(i) > 0
+                ? int(file_progress[idx] * 1000 / ti->files().file_size(i)) : 1000;
+            assert(file_progress[idx] <= ti->files().file_size(i));
+
+            bool const complete = file_progress[idx] == ti->files().file_size(i);
+
+            json::object obj({
+                 {"name", ti->files().file_name(i).to_string()}
+                ,{"size", ti->files().file_size(i)}
+                ,{"progress", progress}
+                ,{"complete", complete}
+                ,{"priority", static_cast<std::uint8_t>(file_prio[idx])}
+            });
+
+            if (f != file_status.end() && f->file_index == i)
+            {
+                if ((f->open_mode & lt::file_open_mode::rw_mask) == lt::file_open_mode::read_write) obj.emplace("state", "read/write");
+                else if ((f->open_mode & lt::file_open_mode::rw_mask) == lt::file_open_mode::read_only) obj.emplace("state", "read");
+                else if ((f->open_mode & lt::file_open_mode::rw_mask) == lt::file_open_mode::write_only) obj.emplace("state", "write");
+                if (f->open_mode & lt::file_open_mode::random_access) obj.emplace("state", "random_access");
+                if (f->open_mode & lt::file_open_mode::sparse) obj.emplace("state", "sparse");
+                ++f;
+            }
+            data.emplace_back(obj);
+
         }
         return json::value(std::move(data));
     }
