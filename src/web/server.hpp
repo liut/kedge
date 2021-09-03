@@ -41,12 +41,12 @@ make_resp_204(const request<Body>& req)
 template <class Body>
 class HttpServer : public std::enable_shared_from_this<HttpServer<Body>> {
 public:
-    typedef std::function<http::response<Body>(http::request<Body>&& request)> Handler;
+    typedef std::function<response<Body>(request<Body>&& request)> Handler;
 
     explicit HttpServer(uint32_t threads = 1) : ioc(threads) {
-        routers.reserve((unsigned)http::verb::unlink);
+        routers.reserve((unsigned)verb::unlink);
         for (auto i = 0U; i < routers.capacity(); ++i) {
-            routers.emplace_back((http::verb)i);
+            routers.emplace_back((verb)i);
         }
     }
     ~HttpServer() {
@@ -68,7 +68,7 @@ public:
         ioc.stop();
     }
 
-    void addRoute(http::verb verb, const std::string &path, Handler handler) {
+    void addRoute(verb verb, const std::string &path, Handler handler) {
         routers[(unsigned)verb].addHandler(path, handler);
     }
 
@@ -84,7 +84,7 @@ public:
         return io_threads;
     }
 
-    http::response<Body> requestHandler(http::request<Body> && request) {
+    response<Body> requestHandler(request<Body> && request) {
         auto methodIdx = (unsigned)request.method();
         Handler *handler = nullptr;
         if (methodIdx < routers.size()) {
