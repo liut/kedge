@@ -14,7 +14,7 @@
 #include <libtorrent/torrent_info.hpp>
 #include <libtorrent/torrent_status.hpp>
 
-#include "context.hpp"
+#include "sheath.hpp"
 #include "util.hpp"
 // #include "http_ws_session.hpp"
 #include "config.h"
@@ -238,7 +238,7 @@ tag_invoke( json::value_from_tag, json::value& jv, lt::torrent_status const& st)
 }
 
 
-context::context(std::shared_ptr<lt::session> const ses, std::string store_dir)
+sheath::sheath(std::shared_ptr<lt::session> const ses, std::string store_dir)
     : ses_(ses)
     , dir_conf(getConfDir("kedge"))
     , dir_store(std::move(store_dir))
@@ -250,14 +250,14 @@ context::context(std::shared_ptr<lt::session> const ses, std::string store_dir)
 }
 
 std::string
-context::resume_file(lt::sha1_hash const& info_hash)
+sheath::resume_file(lt::sha1_hash const& info_hash)
 {
     auto file = dir_resumes / (to_hex(info_hash) + RESUME_EXT);
     return file.string();
 }
 
 void
-context::load_resumes()
+sheath::load_resumes()
 {
     using namespace std::chrono;
     // load resume files
@@ -311,13 +311,13 @@ context::load_resumes()
 }
 
 void
-context::start()
+sheath::start()
 {
     load_resumes();
 }
 
 bool
-context::set_peer(std::string const & addr)
+sheath::set_peer(std::string const & addr)
 {
     lt::tcp::endpoint ep;
     if (parse_endpoint(ep, addr))
@@ -329,7 +329,7 @@ context::set_peer(std::string const & addr)
 }
 
 bool
-context::handle_alert(lt::alert* a)
+sheath::handle_alert(lt::alert* a)
 {
     using namespace lt;
 
@@ -451,7 +451,7 @@ print_alert(lt::alert const* a, std::string& str)
 }
 
 void
-context::pop_alerts()
+sheath::pop_alerts()
 {
     std::vector<lt::alert*> alerts;
     ses_->pop_alerts(&alerts);
@@ -468,7 +468,7 @@ context::pop_alerts()
 }
 
 void
-context::update_counters(lt::span<std::int64_t const> stats_counters, std::uint64_t const t)
+sheath::update_counters(lt::span<std::int64_t const> stats_counters, std::uint64_t const t)
 {
     // only update the previous counters if there's been enough
     // time since it was last updated
@@ -484,7 +484,7 @@ context::update_counters(lt::span<std::int64_t const> stats_counters, std::uint6
 
 
 stats
-context::get_stats()
+sheath::get_stats()
 {
     struct stats s;
     if (m_cnt[0].size() < m_queued_tracker_announces)
@@ -527,13 +527,13 @@ context::get_stats()
 }
 
 json::value
-context::get_stats_json()
+sheath::get_stats_json()
 {
     return json::value_from(get_stats());
 }
 
 void
-context::save_session()
+sheath::save_session()
 {
     if (!ses_->is_paused())
     {
@@ -557,7 +557,7 @@ context::save_session()
 }
 
 void
-context::set_torrent_params(lt::add_torrent_params& p)
+sheath::set_torrent_params(lt::add_torrent_params& p)
 {
     p.max_connections = max_connections_per_torrent;
     p.max_uploads = -1;
@@ -573,7 +573,7 @@ context::set_torrent_params(lt::add_torrent_params& p)
 }
 
 void
-context::add_magnet(lt::string_view uri)
+sheath::add_magnet(lt::string_view uri)
 {
     lt::error_code ec;
     lt::add_torrent_params p = lt::parse_magnet_uri(uri.to_string(), ec);
@@ -600,7 +600,7 @@ context::add_magnet(lt::string_view uri)
 
 // return false on failure
 bool
-context::add_torrent(std::string filename)
+sheath::add_torrent(std::string filename)
 {
     using lt::add_torrent_params;
     using lt::storage_mode_t;
@@ -636,7 +636,7 @@ context::add_torrent(std::string filename)
 }
 
 bool
-context::add_torrent(char const* buffer, int size, std::string const& save_path)
+sheath::add_torrent(char const* buffer, int size, std::string const& save_path)
 {
     using lt::add_torrent_params;
     using lt::storage_mode_t;
@@ -674,7 +674,7 @@ context::add_torrent(char const* buffer, int size, std::string const& save_path)
 }
 
 void
-context::scan_dir(std::string const& dir_path)
+sheath::scan_dir(std::string const& dir_path)
 {
     using namespace lt;
 
@@ -705,7 +705,7 @@ context::scan_dir(std::string const& dir_path)
 }
 
 void
-context::do_loop()
+sheath::do_loop()
 {
     using namespace std::chrono;
     ses_->post_torrent_updates();
@@ -727,7 +727,7 @@ context::do_loop()
 }
 
 void
-context::save_all_resume()
+sheath::save_all_resume()
 {
     using namespace lt;
     // get all the torrent handles that we need to save resume data for
@@ -763,14 +763,14 @@ context::save_all_resume()
 }
 
 void
-context::end()
+sheath::end()
 {
     save_all_resume();
     save_session();
 }
 
 json::value
-context::get_torrents()
+sheath::get_torrents()
 {
     std::vector<lt::torrent_status> const torr = ses_->get_torrent_status(
                         [](lt::torrent_status const& st) { return true; }
@@ -783,7 +783,7 @@ context::get_torrents()
     return json::value(std::move(arr));
 }
 json::value
-context::get_torrent(lt::sha1_hash const& ih, query_flags_t flags)
+sheath::get_torrent(lt::sha1_hash const& ih, query_flags_t flags)
 {
     auto th = ses_->find_torrent(ih);
     if (!th.is_valid())
@@ -870,7 +870,7 @@ context::get_torrent(lt::sha1_hash const& ih, query_flags_t flags)
     return json::value(nullptr);
 }
 bool
-context::exists(lt::sha1_hash const& ih)
+sheath::exists(lt::sha1_hash const& ih)
 {
     auto th = ses_->find_torrent(ih);
     if (th.is_valid())
@@ -881,7 +881,7 @@ context::exists(lt::sha1_hash const& ih)
 }
 
 bool
-context::drop_torrent(lt::sha1_hash const& ih, bool const with_data)
+sheath::drop_torrent(lt::sha1_hash const& ih, bool const with_data)
 {
     // also delete the resume file
     std::string const rpath = resume_file(ih);

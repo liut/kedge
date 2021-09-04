@@ -91,7 +91,7 @@ tag_invoke( json::value_from_tag, json::value& jv, lt::torrent_status const& st)
 using query_flags_t = std::uint16_t;
 
 // Represents the shared server state
-struct context : sessionValues
+struct sheath : sessionValues
 {
 
     static constexpr query_flags_t query_basic = 1;
@@ -99,7 +99,7 @@ struct context : sessionValues
     static constexpr query_flags_t query_files = 4;
 
     explicit
-    context(std::shared_ptr<lt::session> const ses, std::string store_dir);
+    sheath(std::shared_ptr<lt::session> const ses, std::string store_dir);
 
     std::shared_ptr<lt::session> const&
     sess() const noexcept
@@ -209,6 +209,6 @@ private:
 #endif
 
 
-}; // context
+}; // sheath
 
 } // namespace btd

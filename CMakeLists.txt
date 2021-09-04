@@ -63,7 +63,7 @@ find_package(ZLIB REQUIRED)
 message(STATUS "ZLIB libraries: " ${ZLIB_LIBRARIES})
 
 set(sources
-	context.cpp
+	sheath.cpp
 	main.cpp
 	util.cpp)
 

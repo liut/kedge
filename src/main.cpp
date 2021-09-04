@@ -16,7 +16,7 @@ namespace po = boost::program_options;
 #include <libtorrent/session.hpp>
 #include <libtorrent/version.hpp>
 
-#include "context.hpp"
+#include "sheath.hpp"
 #include "util.hpp"
 #include "web/server.hpp"
 #include "config.h"
@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
     }
     const auto ses = std::make_shared<lt::session>(std::move(params));
 
-    const auto ctx = std::make_shared<context>(ses, "./store");
+    const auto ctx = std::make_shared<sheath>(ses, "./store");
 
     std::thread ctx_start_loader([&ctx] {
         ctx->start();
@@ -183,9 +183,9 @@ int main(int argc, char* argv[])
             }
             if (req.method() == verb::get)
             {
-                auto flag = context::query_basic;
-                if ("peers" == act) flag = context::query_peers;
-                else if ("files" == act) flag = context::query_files;
+                auto flag = sheath::query_basic;
+                if ("peers" == act) flag = sheath::query_peers;
+                else if ("files" == act) flag = sheath::query_files;
                 auto jv = ctx->get_torrent(ih, flag);
                 if (jv.is_null())
                 {
