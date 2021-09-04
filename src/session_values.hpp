@@ -3,6 +3,7 @@
 
 #include <libtorrent/session_stats.hpp>
 
+namespace btd {
 
 struct sessionValues {
 
@@ -57,3 +58,5 @@ struct sessionValues {
 
 };
 
+
+} // namespace btd
