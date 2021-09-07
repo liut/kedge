@@ -141,26 +141,6 @@ int save_file(std::string const& filename, std::vector<char> const& v)
     return !f.fail();
 }
 
-bool is_absolute_path(std::string const& f)
-{
-    if (f.empty()) return false;
-#if defined(TORRENT_WINDOWS) || defined(TORRENT_OS2)
-    int i = 0;
-    // match the xx:\ or xx:/ form
-    while (f[i] && strchr("abcdefghijklmnopqrstuvxyz", f[i])) ++i;
-    if (i < int(f.size()-1) && f[i] == ':' && (f[i+1] == '\\' || f[i+1] == '/'))
-        return true;
-
-    // match the \\ form
-    if (int(f.size()) >= 2 && f[0] == '\\' && f[1] == '\\')
-        return true;
-    return false;
-#else
-    if (f[0] == '/') return true;
-    return false;
-#endif
-}
-
 // TODO: refactory with fs
 std::vector<std::string> list_dir(std::string path
     , bool (*filter_fun)(lt::string_view)
@@ -212,26 +192,11 @@ std::vector<std::string> list_dir(std::string path
 }
 
 
-std::string path_cat(std::string const& base, std::string const& path)
+std::string const
+path_cat(std::string_view const& base, std::string_view const& path)
 {
     auto result = fs::path(base)+=path;
     return result.string();
-}
-
-std::string make_absolute_path(std::string const& p)
-{
-    if (is_absolute_path(p)) return p;
-    std::string ret;
-#if defined TORRENT_WINDOWS
-    char* cwd = ::_getcwd(nullptr, 0);
-    ret = path_cat(cwd, p);
-    std::free(cwd);
-#else
-    char* cwd = ::getcwd(nullptr, 0);
-    ret = path_cat(cwd, p);
-    std::free(cwd);
-#endif
-    return ret;
 }
 
 bool
