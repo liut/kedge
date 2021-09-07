@@ -257,8 +257,8 @@ to_hex(lt::sha1_hash const& ih)
     return ret.str();
 }
 
-std::string
-getEnvStr( std::string const & key, std::string const & dft = "" )
+std::string const
+getEnvStr( std::string const & key, std::string const & dft )
 {
     char * val = std::getenv( key.c_str() );
     return val == nullptr ? dft : std::string(val);

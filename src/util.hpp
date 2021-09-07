@@ -53,8 +53,8 @@ uptime();
 std::int64_t
 uptimeMs();
 
-std::string
-getEnvStr(std::string const & key);
+std::string const
+getEnvStr(std::string const & key, std::string const & dft = "");
 
 static std::string
 getHomeDir();
