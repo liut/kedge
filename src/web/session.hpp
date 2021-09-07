@@ -35,7 +35,7 @@ private:
 
                 yield http::async_read(stream, buffer, parser->get(), beast::bind_front_handler(&Session::do_read, this->shared_from_this(), false));
 
-                if (ec == http::error::end_of_stream) {
+                if (ec == http::error::end_of_stream || ec == beast::error::timeout) {
                     break;
                 }
 
