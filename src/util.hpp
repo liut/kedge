@@ -36,7 +36,7 @@ std::vector<std::string>
 list_dir(std::string path, bool (*filter_fun)(lt::string_view), lt::error_code& ec);
 
 std::string
-pathAppend(std::string const& lhs, std::string const& rhs);
+path_cat(std::string const& base, std::string const& path);
 
 bool
 from_hex(lt::sha1_hash & ih, std::string const &s);

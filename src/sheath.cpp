@@ -78,7 +78,7 @@ load_sess_params(std::string const& cd, lt::session_params& params)
     using lt::settings_pack;
 
     std::vector<char> in;
-    if (load_file(pathAppend(cd, SESS_FILE), in))
+    if (load_file(path_cat(cd, SESS_FILE), in))
     {
         lt::error_code ec;
         lt::bdecode_node e = lt::bdecode(in, ec);
@@ -690,7 +690,7 @@ sheath::scan_dir(std::string const& dir_path)
 
     for (auto const& e : ents)
     {
-        std::string const file = pathAppend(dir_path, e);
+        std::string const file = path_cat(dir_path, e);
 
         // there's a new file in the monitor directory, load it up
         if (add_torrent(file))

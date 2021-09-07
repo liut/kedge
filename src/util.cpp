@@ -212,19 +212,10 @@ std::vector<std::string> list_dir(std::string path
 }
 
 
-std::string pathAppend(std::string const& lhs, std::string const& rhs)
+std::string path_cat(std::string const& base, std::string const& path)
 {
-    if (lhs.empty() || lhs == ".") return rhs;
-    if (rhs.empty() || rhs == ".") return lhs;
-
-#if defined(TORRENT_WINDOWS) || defined(TORRENT_OS2)
-#define TORRENT_SEPARATOR "\\"
-    bool need_sep = lhs[lhs.size()-1] != '\\' && lhs[lhs.size()-1] != '/';
-#else
-#define TORRENT_SEPARATOR "/"
-    bool need_sep = lhs[lhs.size()-1] != '/';
-#endif
-    return lhs + (need_sep?TORRENT_SEPARATOR:"") + rhs;
+    auto result = fs::path(base)+=path;
+    return result.string();
 }
 
 std::string make_absolute_path(std::string const& p)
@@ -233,11 +224,11 @@ std::string make_absolute_path(std::string const& p)
     std::string ret;
 #if defined TORRENT_WINDOWS
     char* cwd = ::_getcwd(nullptr, 0);
-    ret = pathAppend(cwd, p);
+    ret = path_cat(cwd, p);
     std::free(cwd);
 #else
     char* cwd = ::getcwd(nullptr, 0);
-    ret = pathAppend(cwd, p);
+    ret = path_cat(cwd, p);
     std::free(cwd);
 #endif
     return ret;
