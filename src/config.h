@@ -7,4 +7,6 @@
 #define PROJECT_VER_MINOR "0"
 #define PTOJECT_VER_PATCH "2"
 
+#define ENV_KEDGE_WEB_UI "KEDGE_WEB_UI"
+
 #endif // INCLUDE_CONFIG
