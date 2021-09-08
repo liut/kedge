@@ -1,13 +1,14 @@
 
-#include <algorithm>
+// #include <algorithm>
+#include <atomic>
 #include <chrono>
-#include <csignal>
+// #include <csignal>
 #include <cstdlib>
 #include <thread>
 #include <utility>
 
-#include <boost/json.hpp>
-namespace json = boost::json;
+// #include <boost/json.hpp>
+// namespace json = boost::json;
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
@@ -16,34 +17,16 @@ namespace po = boost::program_options;
 #include <libtorrent/session.hpp>
 #include <libtorrent/version.hpp>
 
+
+#include "listener.hpp"
+#include "http_caller.hpp"
 #include "sheath.hpp"
 #include "util.hpp"
-#include "web/server.hpp"
 #include "config.h"
-
-namespace {
-  volatile std::sig_atomic_t gSignalStatus;
-}
-
-using namespace http;
-using namespace web;
 
 using namespace btd;
 
-const std::string CT_JSON = "application/json";
-const std::string CT_TEXT = "text/plain";
-
 static std::atomic_bool quit(false);
-
-void signal_handler(int signal)
-{
-    gSignalStatus = signal;
-    std::cerr << "got signal " << signal << std::endl;
-    // make the main loop terminate
-    if (signal == SIGINT || signal == SIGTERM) {
-        quit = true;
-    }
-}
 
 std::string mapper(std::string env_var)
 {
@@ -93,7 +76,7 @@ int main(int argc, char* argv[])
     lt::session_params params;
     load_sess_params(conf_dir, params);
 
-    std::uint16_t peerPort = parse_port(listens);
+    // std::uint16_t peerPort = parse_port(listens);
     if (vm.count("listens"))
     {
         std::clog << "set listens " << listens << '|' << vm["listens"].as<std::string>() << '\n';
@@ -116,116 +99,65 @@ int main(int argc, char* argv[])
         ctx->start();
     });
 
+    const auto caller = std::make_shared<httpCaller>(ctx, btd::getEnvStr("KEDGE_WEBUI"));
+
     // main: web server
 
     auto address = net::ip::make_address("127.0.0.1");
     auto port = static_cast<std::uint16_t>(16180);
     auto const threads = std::max<int>(1, std::thread::hardware_concurrency()/2 -1);
-    auto httpServer = std::make_shared<HttpServer<string_body>>(threads);
 
     std::cerr << "start http server on " << address << ":" << port << std::endl;
-    httpServer->start(address, port, threads);
 
-    httpServer->addRoute(verb::get, "/", [](auto req) {
-        return make_resp_204<string_body>(req);
-    });
-    httpServer->addRoute(verb::get, "/sess", [&peerID, &peerPort](auto req) {
-        const json::value jv= {{"peerID", peerID}, {"peerPort", peerPort}
-            , {"uptime", uptime()}, {"uptimeMs", uptimeMs()}, {"version", lt::version()}};
-        return make_resp<string_body>(req, json::serialize(jv), CT_JSON);
-    });
-    httpServer->addRoute(verb::get, "/stats", [&ctx](auto req) {
-        return make_resp<string_body>(req, json::serialize(ctx->get_stats_json()), CT_JSON);
-    });
-    httpServer->addRoute(verb::get, "/torrents", [&ctx](auto req) {
-        return make_resp<string_body>(req, json::serialize(ctx->get_torrents()), CT_JSON);
-    });
-    httpServer->addRoute(verb::post, "/torrents", [&ctx](auto req) {
-        std::clog << " post clen " << req.find(http::field::content_length)->value() << " bytes\n";
-        auto savePath = req.find("x-save-path");
-        if (savePath == req.end())
+    // The io_context is required for all I/O
+    net::io_context ioc;
+
+    // Create and launch a listening port
+    std::make_shared<listener>(
+        ioc,
+        tcp::endpoint{address, port},
+        caller)->run();
+
+    // Capture SIGINT and SIGTERM to perform a clean shutdown
+    net::signal_set signals(ioc, SIGINT, SIGTERM);
+    signals.async_wait(
+        [&ioc](boost::system::error_code const&, int)
         {
-            return make_resp<string_body>(req, "miss save-path", CT_TEXT, status::bad_request);
-        }
-        const char* buf = req.body().data();
-        const int size = req.body().size();
-        const std::string dir(savePath->value());
-        std::clog << "post metainfo " << size << " bytes with save-path: '" << dir << "'\n";
-        if (ctx->add_torrent(buf, size, dir))
+            // Stop the io_context. This will cause run()
+            // to return immediately, eventually destroying the
+            // io_context and any remaining handlers in it.
+            // ioc.stop();
+            quit = true;
+        });
+
+    // Run the I/O service on the requested number of threads
+    std::vector<std::thread> tv;
+    tv.reserve(threads - 1);
+    for(auto i = threads - 1; i > 0; --i)
+        tv.emplace_back(
+        [&ioc]
         {
-            return make_resp_204<string_body>(req);
-        }
-        return make_resp<string_body>(req, "failed to add", CT_TEXT, status::service_unavailable);
+            ioc.run();
+        });
 
-    });
-    httpServer->setNotFoundHandler([&ctx](auto && req) {
-        const std::string s(req.target().data(), req.target().size());
-        const int ps = 40 + 9;
-        if (s.size() >= ps && s.substr(0, 9) == "/torrent/") // /torrent/{info_hash}/{act}?
-        {
-            lt::sha1_hash ih;
-            if (!from_hex(ih, s.substr(9, 40)))
-            {
-                return make_resp<string_body>(req, "invalid hash string", CT_TEXT, status::bad_request);
-            }
-            if (req.method() == verb::head)
-            {
-                if (ctx->exists(ih))
-                {
-                    return make_resp_204<string_body>(req);
-                }
-                return make_resp<string_body>(req, "not found", CT_TEXT, status::not_found);
-            }
-            std::string act = "";
-            if (s.size() > ps+1)
-            {
-                act = s.substr(ps+1);
-            }
-            if (req.method() == verb::get)
-            {
-                auto flag = sheath::query_basic;
-                if ("peers" == act) flag = sheath::query_peers;
-                else if ("files" == act) flag = sheath::query_files;
-                auto jv = ctx->get_torrent(ih, flag);
-                if (jv.is_null())
-                {
-                    return make_resp<string_body>(req, "not found", CT_TEXT, status::not_found);
-                }
-                return make_resp<string_body>(req, json::serialize(jv), CT_JSON);
-            }
-            if (req.method() == verb::delete_)
-            {
-                ctx->drop_torrent(ih, ("yes" == act || "with_data" == act));
-                return make_resp_204<string_body>(req);
-            }
-
-
-        } // torrent
-        return make_resp<string_body>(req, "not found", CT_TEXT, status::not_found);
-    });
-    // TODO: routes
-
-#ifndef _WIN32
-    signal(SIGTERM, signal_handler);
-    signal(SIGINT, signal_handler);
-#endif
-    std::thread main_loader([&ctx, &httpServer] {
+    std::thread main_loader([&ctx, &ioc] {
         while (!quit)
         {
             ctx->do_loop();
         }
-        httpServer->stop();
+        ioc.stop();
     });
 
     std::cerr << "http server running" << std::endl;
-    httpServer->getIoContext().run();
+    ioc.run(); // forever
     std::cerr << "http server ran ?" << std::endl;
 
     // Block until all the threads exit
     std::cerr << "thread joinning";
-    for (auto & thread : httpServer->getIoThreads()) {
+    // Block until all the threads exit
+    for(auto& t : tv) {
         std::cerr << " .";
-        thread.join();
+        t.join();
     }
     std::cerr << '\n';
 

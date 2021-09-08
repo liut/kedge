@@ -63,6 +63,9 @@ find_package(ZLIB REQUIRED)
 message(STATUS "ZLIB libraries: " ${ZLIB_LIBRARIES})
 
 set(sources
+	http_session.cpp
+	http_websocket.cpp
+	listener.cpp
 	sheath.cpp
 	main.cpp
 	util.cpp)
