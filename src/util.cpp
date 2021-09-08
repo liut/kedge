@@ -279,6 +279,13 @@ getLogsDir()
     return dir.string();
 }
 
+std::string const
+getWebUI()
+{
+    auto dir = fs::path(getHomeDir()) / "webui";
+    return getEnvStr(ENV_KEDGE_WEB_UI, dir.string());
+}
+
 std::int16_t
 parse_port(std::string const& addr) noexcept
 {

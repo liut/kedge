@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
         ctx->start();
     });
 
-    const auto caller = std::make_shared<httpCaller>(ctx, btd::getEnvStr(ENV_KEDGE_WEB_UI));
+    const auto caller = std::make_shared<httpCaller>(ctx, getWebUI());
 
     // main: web server
 
