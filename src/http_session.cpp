@@ -119,38 +119,6 @@ handle_request(
     return send(std::move(res));
 }
 
-struct http_session::send_lambda
-{
-    http_session& self_;
-
-    explicit
-    send_lambda(http_session& self)
-        : self_(self)
-    {
-    }
-
-    template<bool isRequest, class Body, class Fields>
-    void
-    operator()(http::message<isRequest, Body, Fields>&& msg) const
-    {
-        // The lifetime of the message has to extend
-        // for the duration of the async operation so
-        // we use a shared_ptr to manage it.
-        auto sp = std::make_shared<
-            http::message<isRequest, Body, Fields>>(std::move(msg));
-
-        // Write the response
-        auto self = self_.shared_from_this();
-        http::async_write(
-            self_.stream_,
-            *sp,
-            [self, sp](beast::error_code ec, std::size_t bytes)
-            {
-                self->on_write(ec, bytes, sp->need_eof());
-            });
-    }
-};
-
 //------------------------------------------------------------------------------
 
 http_session::
@@ -231,8 +199,6 @@ on_read(beast::error_code ec, std::size_t)
         return;
     }
 
-    // Send the response
-#ifndef BOOST_NO_CXX14_GENERIC_LAMBDAS
     //
     // The following code requires generic
     // lambdas, available in C++14 and later.
@@ -248,16 +214,6 @@ on_read(beast::error_code ec, std::size_t)
             using response_type = typename std::decay<decltype(response)>::type;
             auto sp = std::make_shared<response_type>(std::forward<decltype(response)>(response));
 
-        #if 0
-            // NOTE This causes an ICE in gcc 7.3
-            // Write the response
-            http::async_write(this->stream_, *sp,
-                [self = shared_from_this(), sp](
-                    beast::error_code ec, std::size_t bytes)
-                {
-                    self->on_write(ec, bytes, sp->need_eof());
-                });
-        #else
             // Write the response
             auto self = shared_from_this();
             http::async_write(stream_, *sp,
@@ -266,18 +222,9 @@ on_read(beast::error_code ec, std::size_t)
                 {
                     self->on_write(ec, bytes, sp->need_eof());
                 });
-        #endif
+
         });
-#else
-    //
-    // This code uses the function object type send_lambda in
-    // place of a generic lambda which is not available in C++11
-    //
-    handle_request(
-        caller_,
-        parser_->release(),
-        send_lambda(*this));
-#endif
+
 }
 
 void
