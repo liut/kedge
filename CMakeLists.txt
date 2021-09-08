@@ -70,16 +70,7 @@ set(sources
 	main.cpp
 	util.cpp)
 
-set(web_sources
-	listener.hpp
-	net.hpp
-	router.hpp
-	server.hpp
-	session.hpp
-	token.hpp)
-
 list(TRANSFORM sources PREPEND "src/")
-list(TRANSFORM web_sources PREPEND "src/web/")
 
 add_executable(kedge ${sources})
 
