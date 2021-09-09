@@ -1,5 +1,5 @@
-#ifndef INCLUDE_CONFIG
-#define INCLUDE_CONFIG
+#ifndef INCLUDE_CONFIG_H
+#define INCLUDE_CONFIG_H
 
 #define PROJECT_NAME "Kedge"
 #define PROJECT_VER  "0.0.2"
@@ -7,4 +7,6 @@
 #define PROJECT_VER_MINOR "0"
 #define PTOJECT_VER_PATCH "2"
 
-#endif // INCLUDE_CONFIG
+#define ENV_KEDGE_WEB_UI "KEDGE_WEB_UI"
+
+#endif // INCLUDE_CONFIG_H

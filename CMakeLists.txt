@@ -63,20 +63,14 @@ find_package(ZLIB REQUIRED)
 message(STATUS "ZLIB libraries: " ${ZLIB_LIBRARIES})
 
 set(sources
+	http_session.cpp
+	http_websocket.cpp
+	listener.cpp
 	sheath.cpp
 	main.cpp
 	util.cpp)
 
-set(web_sources
-	listener.hpp
-	net.hpp
-	router.hpp
-	server.hpp
-	session.hpp
-	token.hpp)
-
 list(TRANSFORM sources PREPEND "src/")
-list(TRANSFORM web_sources PREPEND "src/web/")
 
 add_executable(kedge ${sources})
 

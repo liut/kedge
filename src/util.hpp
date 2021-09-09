@@ -11,6 +11,8 @@
 #include <libtorrent/sha1_hash.hpp>
 #include <libtorrent/string_view.hpp>
 
+#include "config.h"
+
 namespace btd {
 
 namespace fs = std::filesystem;
@@ -65,6 +67,9 @@ getConfDir(std::string const& app);
 
 std::string const
 getLogsDir();
+
+std::string const
+getWebUI();
 
 std::int16_t
 parse_port(std::string const& addr) noexcept;
