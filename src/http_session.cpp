@@ -100,7 +100,7 @@ handle_request(
     if(req.method() == verb::head)
     {
         response<empty_body> res{status::ok, req.version()};
-        res.set(field::server, BOOST_BEAST_VERSION_STRING);
+        res.set(field::server, SERVER_SIGNATURE);
         res.set(field::content_type, mime_type(path));
         res.content_length(size);
         res.keep_alive(req.keep_alive());
@@ -112,7 +112,7 @@ handle_request(
         std::piecewise_construct,
         std::make_tuple(std::move(body)),
         std::make_tuple(status::ok, req.version())};
-    res.set(field::server, BOOST_BEAST_VERSION_STRING);
+    res.set(field::server, SERVER_SIGNATURE);
     res.set(field::content_type, mime_type(path));
     res.content_length(size);
     res.keep_alive(req.keep_alive());

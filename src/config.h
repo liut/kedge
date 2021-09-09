@@ -7,6 +7,8 @@
 #define PROJECT_VER_MINOR "0"
 #define PTOJECT_VER_PATCH "2"
 
+#define SERVER_SIGNATURE "Kedge/0.0.2"
+
 #define ENV_KEDGE_WEB_UI "KEDGE_WEB_UI"
 
 #endif // INCLUDE_CONFIG_H

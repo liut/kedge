@@ -7,6 +7,7 @@
 #include <boost/json.hpp>
 namespace json = boost::json;
 
+#include "config.h"
 #include "net.hpp"
 
 namespace btd {
@@ -27,7 +28,7 @@ make_resp(const request<RequestBody>& req
 	, const std::string_view ct, const status sc = status::ok)
 {
     response<ResponseBody> res{ sc, req.version() };
-    res.set(field::server, BOOST_BEAST_VERSION_STRING);
+    res.set(field::server, SERVER_SIGNATURE);
     res.set(field::content_type, ct);
     res.set(field::cache_control, hdCacheControl);
     res.set(field::pragma, hdPragma);
