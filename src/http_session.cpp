@@ -3,7 +3,7 @@
 #include "http_util.hpp"
 #include "http_session.hpp"
 #include "http_websocket.hpp"
-#include "http_caller.hpp"
+#include "handlers.hpp"
 
 namespace btd {
 
@@ -72,7 +72,7 @@ handle_request(
         req.target().find("..") != std::string_view::npos)
         return send(bad_request("Illegal request-target"));
 
-    auto opt_resp = caller->call_sb(req);
+    auto opt_resp = caller->sbCall(req);
     if (opt_resp) return send(opt_resp.value());
 
     // Build the path to the requested file

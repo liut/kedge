@@ -63,11 +63,12 @@ find_package(ZLIB REQUIRED)
 message(STATUS "ZLIB libraries: " ${ZLIB_LIBRARIES})
 
 set(sources
+	handlers.cpp
 	http_session.cpp
 	http_websocket.cpp
 	listener.cpp
-	sheath.cpp
 	main.cpp
+	sheath.cpp
 	util.cpp)
 
 list(TRANSFORM sources PREPEND "src/")
