@@ -69,6 +69,9 @@ std::string const
 getLogsDir();
 
 std::string const
+getStoreDir();
+
+std::string const
 getWebUI();
 
 std::int16_t

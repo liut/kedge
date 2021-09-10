@@ -280,6 +280,13 @@ getLogsDir()
 }
 
 std::string const
+getStoreDir()
+{
+    auto dir = fs::path(getHomeDir()) / "Downloads";
+    return dir.string();
+}
+
+std::string const
 getWebUI()
 {
     auto dir = fs::path(getConfDir()) / "webui";
