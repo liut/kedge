@@ -240,7 +240,7 @@ tag_invoke( json::value_from_tag, json::value& jv, lt::torrent_status const& st)
 
 sheath::sheath(std::shared_ptr<lt::session> const ses, std::string store_dir)
     : ses_(ses)
-    , dir_conf(getConfDir("kedge"))
+    , dir_conf(getConfDir())
     , dir_store(std::move(store_dir))
     , dir_resumes(dir_conf / RESUME_DIR)
     , dir_watches(dir_conf / WATCH_DIR)

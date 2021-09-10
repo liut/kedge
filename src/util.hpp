@@ -63,7 +63,7 @@ static std::string
 getHomeDir();
 
 std::string const
-getConfDir(std::string const& app);
+getConfDir(std::string const& app = APP_NAME);
 
 std::string const
 getLogsDir();

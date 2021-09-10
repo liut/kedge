@@ -9,7 +9,7 @@
 #include <sstream>
 #include <thread>
 #include <utility>
-#include <string.h>
+#include <string.h> // strdup
 
 #ifndef _WIN32
 #include <pwd.h>

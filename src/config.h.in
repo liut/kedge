@@ -7,6 +7,12 @@
 #define PROJECT_VER_MINOR "@PROJECT_VERSION_MINOR@"
 #define PTOJECT_VER_PATCH "@PROJECT_VERSION_PATCH@"
 
+#ifdef __APPLE__
+#define APP_NAME "Kedge"
+#else
+#define APP_NAME "kedge"
+#endif
+
 #define SERVER_SIGNATURE "@PROJECT_NAME@/@PROJECT_VERSION@"
 
 #define ENV_KEDGE_WEB_UI "KEDGE_WEB_UI"

@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
     using lt::session_handle;
     using lt::settings_pack;
 
-    auto conf_dir = getConfDir("kedge");
+    auto conf_dir = getConfDir();
     if (! prepare_dirs(conf_dir))
     {
         return EXIT_FAILURE;
@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
     }
     const auto ses = std::make_shared<lt::session>(std::move(params));
 
-    const auto ctx = std::make_shared<sheath>(ses, "./store");
+    const auto ctx = std::make_shared<sheath>(ses, getStoreDir());
 
     std::thread ctx_start_loader([&ctx] {
         ctx->start();
