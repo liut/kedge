@@ -282,7 +282,7 @@ getLogsDir()
 std::string const
 getWebUI()
 {
-    auto dir = fs::path(getHomeDir()) / "webui";
+    auto dir = fs::path(getConfDir()) / "webui";
     return getEnvStr(ENV_KEDGE_WEB_UI, dir.string());
 }
 
