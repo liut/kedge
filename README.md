@@ -6,14 +6,14 @@ A bittorrent engine base on libtorrent-rasterbar with RESTful API
 JSON APIs
 ---
 
-* `GET` `/sess` current session information, 200
-* `GET` `/stats` statistices of session, 200
-* `GET` `/torrents` show all torrents, 200
-* `POST` `/torrents` new task with torrent file in body, 204 | 500
-* `GET` `/torrent/{infohash}` show a torrent status, 200 | 404
-* `GET` `/torrent/{infohash}/{act}` (files|peers), 200 | 404
-* `HEAD` `/torrent/{infohash}`, 204 | 404
-* `DELETE` `/torrent/{infohash}` remove a torrent, 204 | 404
+* `GET` `/api/sess` current session information, 200
+* `GET` `/api/stats` statistices of session, 200
+* `GET` `/api/torrents` show all torrents, 200
+* `POST` `/api/torrents` new task with torrent file in body, 204 | 500
+* `GET` `/api/torrent/{infohash}` show a torrent status, 200 | 404
+* `GET` `/api/torrent/{infohash}/{act}` act=(files|peers), 200 | 404
+* `HEAD` `/api/torrent/{infohash}`, 204 | 404
+* `DELETE` `/api/torrent/{infohash}` remove a torrent, 204 | 404
 
 **`infohash`: 40 bytes**
 
@@ -26,29 +26,29 @@ TODO
 
 ### add a torrent
 ```bash
-curl -v -X POST --data-binary @debian-10.10.0-amd64-netinst.iso.torrent -H 'x-save-path: /tmp' http://localhost:16180/torrents
+curl -v -X POST --data-binary @debian-10.10.0-amd64-netinst.iso.torrent -H 'x-save-path: /tmp' http://localhost:16180/api/torrents
 ```
 
 ### show all torrents
 ```bash
-curl http://localhost:16180/torrents | jq
+curl http://localhost:16180/api/torrents | jq
 ```
 
 ### check a torrent exist
 ```bash
-curl -v -I http://localhost:16180/torrent/5e13283d8dc83894fa899b4702f114dcab6b736e
+curl -v -I http://localhost:16180/api/torrent/5e13283d8dc83894fa899b4702f114dcab6b736e
 ```
 
 ### drop a torrent
 ```bash
-curl -v -X DELETE http://localhost:16180/torrent/5e13283d8dc83894fa899b4702f114dcab6b736e
+curl -v -X DELETE http://localhost:16180/api/torrent/5e13283d8dc83894fa899b4702f114dcab6b736e
 # or
-curl -v -X DELETE http://localhost:16180/torrent/5e13283d8dc83894fa899b4702f114dcab6b736e/with_data
+curl -v -X DELETE http://localhost:16180/api/torrent/5e13283d8dc83894fa899b4702f114dcab6b736e/with_data
 ```
 
 ### show session stats
 ```bash
-curl http://localhost:16180/stats | jq
+curl http://localhost:16180/api/stats | jq
 ```
 
 ## Dependencies
@@ -60,7 +60,6 @@ curl http://localhost:16180/stats | jq
 * [Boost.Beast](https://github.com/boostorg/beast) http, websocket
 * [Boost.JSON](https://github.com/boostorg/json) new JSON relative to PropertyTree!
 * [Boost.ProgramOption](https://github.com/boostorg/program_options) config and options
-* [Beast Router](https://github.com/shirayukikitsune/beast-router) A simple router(changed)
 
 ## Build
 

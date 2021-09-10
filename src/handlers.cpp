@@ -30,11 +30,13 @@ const std::optional<http::response<string_body>>
 httpCaller::
 sbCall(http::request<string_body> const& req)
 {
-	if (req.method() == verb::get && req.target() == "/sess"sv) return handleSession(req);
-	if (req.method() == verb::get && req.target() == "/stats"sv) return handleStats(req);
-	if (req.target() == "/torrents"sv) return handleTorrents(req);
+	if (req.target().find("/api/") == std::string_view::npos) return std::nullopt;
+	auto uri = req.target().substr(4);
+	if (req.method() == verb::get && uri == "/sess"sv) return handleSession(req);
+	if (req.method() == verb::get && uri == "/stats"sv) return handleStats(req);
+	if (uri == "/torrents"sv) return handleTorrents(req);
 
-    if (req.target().find("/torrent/") == 0) return handleTorrent(req);
+    if (uri.find("/torrent/") == 0) return handleTorrent(req, 13); // len(/api/torrent/) == 13
 
 	// TODO: more routes
 	return std::nullopt;
@@ -91,17 +93,19 @@ handleTorrents(http::request<string_body> const& req) // get or post
 }
 
 
+// handle a torrent with GET or POST or DELETE
 http::response<string_body>
 httpCaller::
-handleTorrent(http::request<string_body> const& req) // get or post or delete torrent
+handleTorrent(http::request<string_body> const& req, size_t const offset)
 {
-	// /torrent/{info_hash}/{act}?
+	// len(/api/torrent/{info_hash}/{act}?) >= 4 + 9 + 40
 	const std::string s(req.target().data(), req.target().size());
-	const int ps = 40 + 9;
-	if (s.size() < ps) return make_resp_404(req);
+	const size_t ih_size = 40;
+	const size_t min_size = offset+ih_size;
+	if (s.size() < min_size) return make_resp_404(req);
 
 	lt::sha1_hash ih;
-	if (!from_hex(ih, s.substr(9, 40)))
+	if (!from_hex(ih, s.substr(offset, ih_size)))
 	{
 		return make_resp_400(req, "invalid hash string");
 	}
@@ -114,9 +118,9 @@ handleTorrent(http::request<string_body> const& req) // get or post or delete to
 		return make_resp_404(req);
 	}
 	std::string act = "";
-	if (s.size() > ps + 1)
+	if (s.size() > min_size + 1)
 	{
-		act = s.substr(ps + 1);
+		act = s.substr(min_size + 1);
 	}
 	if (req.method() == verb::get)
 	{
