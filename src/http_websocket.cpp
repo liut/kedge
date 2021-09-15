@@ -43,7 +43,7 @@ on_accept(beast::error_code ec)
 {
     // Handle the error, if any
     if(ec)
-        return fail(ec, "accept");
+        return fail(ec, "ws on_accept");
 
     // Add this session to the list of active sessions
     caller_->join(this);
@@ -62,7 +62,7 @@ on_read(beast::error_code ec, std::size_t)
 {
     // Handle the error, if any
     if(ec)
-        return fail(ec, "read");
+        return fail(ec, "ws on_read");
 
     // Send to all connections
     caller_->send(beast::buffers_to_string(buffer_.data()));
@@ -119,7 +119,7 @@ on_write(beast::error_code ec, std::size_t)
 {
     // Handle the error, if any
     if(ec)
-        return fail(ec, "write");
+        return fail(ec, "ws on_write");
 
     // Remove the string from the queue
     queue_.erase(queue_.begin());

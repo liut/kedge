@@ -178,7 +178,7 @@ http_session::
 on_read(beast::error_code ec, std::size_t)
 {
     // This means they closed the connection
-    if(ec == http::error::end_of_stream)
+    if(ec == http::error::end_of_stream || ec == beast::error::timeout)
     {
         stream_.socket().shutdown(tcp::socket::shutdown_send, ec);
         return;
@@ -186,7 +186,7 @@ on_read(beast::error_code ec, std::size_t)
 
     // Handle the error, if any
     if(ec)
-        return fail(ec, "read");
+        return fail(ec, "http on_read");
 
     // See if it is a WebSocket Upgrade
     if(websocket::is_upgrade(parser_->get()))
@@ -194,8 +194,7 @@ on_read(beast::error_code ec, std::size_t)
         // Create a websocket session, transferring ownership
         // of both the socket and the HTTP request.
         std::make_shared<websocket_session>(
-            stream_.release_socket(),
-                caller_)->run(parser_->release());
+            stream_.release_socket(), caller_)->run(parser_->release());
         return;
     }
 
@@ -233,7 +232,7 @@ on_write(beast::error_code ec, std::size_t, bool close)
 {
     // Handle the error, if any
     if(ec)
-        return fail(ec, "write");
+        return fail(ec, "http on_write");
 
     if(close)
     {
