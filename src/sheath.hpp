@@ -24,6 +24,7 @@ namespace json = boost::json;
 #include <libtorrent/sha1_hash.hpp>
 #include <libtorrent/span.hpp>
 
+#include "session_stats.hpp"
 #include "session_values.hpp"
 
 // Forward declaration
@@ -41,7 +42,6 @@ const std::string CERT_DIR = "certificates"s;
 const int WATCH_INTERVAL = 2; // seconds
 const int S_WAIT_SAVE = 6; // seconds
 
-
 bool
 prepare_dirs(std::string const & cd);
 
@@ -52,36 +52,6 @@ std::string
 resume_file(std::string const& cd, lt::sha1_hash const& info_hash);
 
 
-struct sessionStats
-{
-    int64_t bytesRecv;
-    int64_t bytesSent;
-    int64_t bytesDataRecv;
-    int64_t bytesDataSent;
-    int64_t rateRecv;
-    int64_t rateSent;
-    int64_t bytesFailed;
-    int64_t bytesWasted;
-    int64_t bytesQueued;
-    int numChecking;
-    int numDownloading;
-    int numSeeding;
-    int numStopped;
-    int numQueued;
-    int numError;
-    int numPeersConnected;
-    int numPeersHalfOpen;
-    int limitUpQueue;
-    int limitDownQueue;
-    int queuedTrackerAnnounces;
-    bool hasIncoming;
-    time_t uptime;
-    uint64_t uptimeMs;
-};
-
-void
-tag_invoke( json::value_from_tag, json::value& jv, sessionStats const& s );
-
 json::object
 torrent_status_to_json_obj(lt::torrent_status const& st);
 
@@ -91,7 +61,7 @@ tag_invoke( json::value_from_tag, json::value& jv, lt::torrent_status const& st)
 using query_flags_t = std::uint16_t;
 
 // Represents the shared server state
-struct sheath : sessionValues
+struct sheath
 {
 
     static constexpr query_flags_t query_basic = 1;
@@ -111,9 +81,6 @@ struct sheath : sessionValues
     getSessionStats();
 
     json::value
-    get_stats_json();
-
-    json::value
     get_torrents();
     json::value
     get_torrent(lt::sha1_hash const& ih, query_flags_t flags = query_basic);
@@ -121,9 +88,6 @@ struct sheath : sessionValues
     exists(lt::sha1_hash const& ih);
     bool
     drop_torrent(lt::sha1_hash const& ih, bool const with_data);
-
-    void
-    update_counters(lt::span<std::int64_t const> stats_counters, std::uint64_t t);
 
     std::string
     resume_file(lt::sha1_hash const& info_hash);
@@ -173,21 +137,9 @@ private:
     fs::path const file_ses_state;
     lt::tcp::endpoint* peer_ = nullptr; // prepared peer ip:port
 
-    // This mutex synchronizes all access to sessions_
-    std::mutex mutex_;
-
-    // Keep a list of all the connected clients
-    // std::unordered_set<websocket_session*> sessions_;
+    sessionValues  svs = sessionValues();
 
     std::deque<std::string>& events;
-
-    // there are two sets of counters. the current one and the last one. This
-    // is used to calculate rates
-    std::vector<std::int64_t> m_cnt[2];
-
-    // the timestamps of the counters in m_cnt[0] and m_cnt[1]
-    // respectively. The timestamps are microseconds since session start
-    std::uint64_t m_timestamp[2];
 
     // the number of times we've asked to save resume data
     // without having received a response (successful or failure)

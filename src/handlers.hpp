@@ -44,14 +44,13 @@ public:
     sbCall(http::request<string_body> const& req);
 
     http::response<string_body>
-    handleSession(http::request<string_body> const& req);
+    handleSessionInfo(http::request<string_body> const& req);
 
     http::response<string_body>
-    handleStats(http::request<string_body> const& req);
+    handleSessionStats(http::request<string_body> const& req);
 
     http::response<string_body>
     handleTorrents(http::request<string_body> const& req) ;
-
 
     http::response<string_body>
     handleTorrent(http::request<string_body> const& req, size_t const offset);

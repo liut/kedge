@@ -1,11 +1,22 @@
 #pragma once
 
 
+#include <libtorrent/config.hpp>
+
 #include <libtorrent/session_stats.hpp>
 
 namespace btd {
 
-struct sessionValues {
+class sessionValues {
+
+    // there are two sets of counters. the current one and the last one. This
+    // is used to calculate rates
+    std::vector<std::int64_t> m_cnt[2];
+
+    // the timestamps of the counters in m_cnt[0] and m_cnt[1]
+    // respectively. The timestamps are microseconds since session start
+    std::uint64_t m_timestamp[2];
+
 
     int const m_num_checking_idx = lt::find_metric_idx("ses.num_checking_torrents");
     int const m_num_stopped_idx = lt::find_metric_idx("ses.num_stopped_torrents");
@@ -54,6 +65,75 @@ struct sessionValues {
     int const m_utp_close_wait = lt::find_metric_idx("utp.num_utp_close_wait");
 
     int const m_queued_tracker_announces = lt::find_metric_idx("tracker.num_queued_tracker_announces");
+
+public:
+    sessionValues()
+    {
+        std::vector<lt::stats_metric> metrics = lt::session_stats_metrics();
+        m_cnt[0].resize(metrics.size(), 0);
+        m_cnt[1].resize(metrics.size(), 0);
+    }
+
+    void
+    updateCounters(lt::span<std::int64_t const> sc, std::uint64_t t)
+    {
+        // only update the previous counters if there's been enough
+        // time since it was last updated
+        if (t - m_timestamp[1] > 2000000)
+        {
+            m_cnt[1].swap(m_cnt[0]);
+            m_timestamp[1] = m_timestamp[0];
+        }
+
+        m_cnt[0].assign(sc.begin(), sc.end());
+        m_timestamp[0] = t;
+    }
+
+    sessionStats
+    getSessionStats() const
+    {
+        sessionStats s;
+        if (m_cnt[0].size() < m_queued_tracker_announces)
+        {
+            std::cerr << "ctx empty stats: " << m_cnt[0].size() << std::endl;
+            return s;
+        }
+        s.numChecking = int(m_cnt[0][m_num_checking_idx]);
+        s.numDownloading = int(m_cnt[0][m_num_downloading_idx]);
+        s.numSeeding = int(m_cnt[0][m_num_seeding_idx]);
+        s.numStopped = int(m_cnt[0][m_num_stopped_idx]);
+        s.numQueued = int(m_cnt[0][m_num_queued_seeding_idx] + m_cnt[0][m_num_queued_download_idx]);
+        s.numError = int(m_cnt[0][m_num_error_idx]);
+
+        s.bytesRecv = std::uint64_t(m_cnt[0][m_recv_idx]);
+        s.bytesSent = std::uint64_t(m_cnt[0][m_sent_idx]);
+        s.bytesDataRecv = std::uint64_t(m_cnt[0][m_recv_data_idx]);
+        s.bytesDataSent = std::uint64_t(m_cnt[0][m_send_data_idx]);
+
+        if (m_cnt[1].size() >= m_queued_tracker_announces)
+        {
+            float const seconds = (m_timestamp[0] - m_timestamp[1]) / 1000000.f;
+            int const download_rate = int((m_cnt[0][m_recv_idx] - m_cnt[1][m_recv_idx])
+                / seconds);
+            int const upload_rate = int((m_cnt[0][m_sent_idx] - m_cnt[1][m_sent_idx])
+                / seconds);
+            s.rateRecv = download_rate;
+            s.rateSent = upload_rate;
+        }
+
+        s.bytesFailed = std::uint64_t(m_cnt[0][m_failed_bytes_idx]);
+        s.bytesQueued = std::uint64_t(m_cnt[0][m_queued_bytes_idx]);
+        s.bytesWasted = std::uint64_t(m_cnt[0][m_wasted_bytes_idx]);
+        s.numPeersConnected = int(m_cnt[0][m_num_peers_connected_idx]);
+        s.numPeersHalfOpen = int(m_cnt[0][m_num_peers_half_open_idx]);
+        s.limitUpQueue = int(m_cnt[0][m_limiter_up_queue_idx]);
+        s.limitDownQueue = int(m_cnt[0][m_limiter_down_queue_idx]);
+        s.queuedTrackerAnnounces = int(m_cnt[0][m_queued_tracker_announces]);
+        s.hasIncoming = int(m_cnt[0][m_has_incoming_idx]);
+        s.uptime = uptime();
+        s.uptimeMs = uptimeMs();
+        return std::move(s);
+    }
 
 };
 

@@ -126,40 +126,6 @@ load_sess_params(std::string const& cd, lt::session_params& params)
 }
 
 
-void
-tag_invoke( json::value_from_tag, json::value& jv, sessionStats const& s )
-{
-    json::object obj;
-    if (s.bytesRecv > 0) obj.emplace("bytesRecv", s.bytesRecv);
-    if (s.bytesSent > 0) obj.emplace("bytesSent", s.bytesSent);
-    if (s.bytesDataRecv > 0) obj.emplace("bytesDataRecv", s.bytesDataRecv);
-    if (s.bytesDataSent > 0) obj.emplace("bytesDataSent", s.bytesDataSent);
-    if (s.rateRecv > 0) obj.emplace("rateRecv", s.rateRecv);
-    if (s.rateSent > 0) obj.emplace("rateSent", s.rateSent);
-    if (s.bytesFailed > 0) obj.emplace("bytesFailed", s.bytesFailed);
-    if (s.bytesQueued > 0) obj.emplace("bytesQueued", s.bytesQueued);
-    if (s.bytesWasted > 0) obj.emplace("bytesWasted", s.bytesWasted);
-    if (s.numChecking > 0) obj.emplace("numChecking", s.numChecking);
-    if (s.numDownloading > 0) obj.emplace("numDownloading", s.numDownloading);
-    if (s.numSeeding > 0) obj.emplace("numSeeding", s.numSeeding);
-    if (s.numStopped > 0) obj.emplace("numStopped", s.numStopped);
-    if (s.numQueued > 0) obj.emplace("numQueued", s.numQueued);
-    if (s.numError > 0) obj.emplace("numError", s.numError);
-    if (s.numPeersConnected > 0) obj.emplace("numPeersConnected", s.numPeersConnected);
-    if (s.numPeersHalfOpen > 0) obj.emplace("numPeersHalfOpen", s.numPeersHalfOpen);
-    if (s.limitUpQueue > 0) obj.emplace("limitUpQueue", s.limitUpQueue);
-    if (s.limitDownQueue > 0) obj.emplace("limitDownQueue", s.limitDownQueue);
-    if (s.hasIncoming) obj.emplace("hasIncoming", true);
-    int activeCount = s.numChecking + s.numDownloading + s.numSeeding;
-    int puasedCount = s.numQueued + s.numStopped;
-    if (activeCount > 0) obj.emplace("activeCount", activeCount);
-    if (puasedCount > 0) obj.emplace("puasedCount", puasedCount);
-    obj.emplace("taskCount", activeCount + puasedCount);
-    if (s.uptime > 0) obj.emplace("uptime", s.uptime);
-    if (s.uptimeMs > 0) obj.emplace("uptimeMs", s.uptimeMs);
-    jv = json::value(obj);
-}
-
 json::object
 torrent_status_to_json_obj(lt::torrent_status const& st)
 {
@@ -335,7 +301,7 @@ sheath::handle_alert(lt::alert* a)
 
     if (session_stats_alert* s = alert_cast<session_stats_alert>(a))
     {
-        update_counters(s->counters(), duration_cast<microseconds>(s->timestamp().time_since_epoch()).count());
+        svs.updateCounters(s->counters(), duration_cast<microseconds>(s->timestamp().time_since_epoch()).count());
         return true;
     }
 
@@ -467,72 +433,11 @@ sheath::pop_alerts()
     }
 }
 
-void
-sheath::update_counters(lt::span<std::int64_t const> stats_counters, std::uint64_t const t)
-{
-    // only update the previous counters if there's been enough
-    // time since it was last updated
-    if (t - m_timestamp[1] > 2000000)
-    {
-        m_cnt[1].swap(m_cnt[0]);
-        m_timestamp[1] = m_timestamp[0];
-    }
-
-    m_cnt[0].assign(stats_counters.begin(), stats_counters.end());
-    m_timestamp[0] = t;
-}
-
 
 sessionStats
 sheath::getSessionStats()
 {
-    struct sessionStats s;
-    if (m_cnt[0].size() < m_queued_tracker_announces)
-    {
-        std::cerr << "ctx empty stats: " << m_cnt[0].size() << std::endl;
-        return s;
-    }
-    s.numChecking = int(m_cnt[0][m_num_checking_idx]);
-    s.numDownloading = int(m_cnt[0][m_num_downloading_idx]);
-    s.numSeeding = int(m_cnt[0][m_num_seeding_idx]);
-    s.numStopped = int(m_cnt[0][m_num_stopped_idx]);
-    s.numQueued = int(m_cnt[0][m_num_queued_seeding_idx] + m_cnt[0][m_num_queued_download_idx]);
-    s.numError = int(m_cnt[0][m_num_error_idx]);
-
-    s.bytesRecv = std::uint64_t(m_cnt[0][m_recv_idx]);
-    s.bytesSent = std::uint64_t(m_cnt[0][m_sent_idx]);
-    s.bytesDataRecv = std::uint64_t(m_cnt[0][m_recv_data_idx]);
-    s.bytesDataSent = std::uint64_t(m_cnt[0][m_send_data_idx]);
-
-    if (m_cnt[1].size() >= m_queued_tracker_announces)
-    {
-        float const seconds = (m_timestamp[0] - m_timestamp[1]) / 1000000.f;
-    int const download_rate = int((m_cnt[0][m_recv_idx] - m_cnt[1][m_recv_idx])
-        / seconds);
-    int const upload_rate = int((m_cnt[0][m_sent_idx] - m_cnt[1][m_sent_idx])
-        / seconds);
-    s.rateRecv = download_rate;
-    s.rateSent = upload_rate;
-    }
-
-    s.bytesFailed = std::uint64_t(m_cnt[0][m_failed_bytes_idx]);
-    s.bytesQueued = std::uint64_t(m_cnt[0][m_queued_bytes_idx]);
-    s.bytesWasted = std::uint64_t(m_cnt[0][m_wasted_bytes_idx]);
-    s.numPeersConnected = int(m_cnt[0][m_num_peers_connected_idx]);
-    s.numPeersHalfOpen = int(m_cnt[0][m_num_peers_half_open_idx]);
-    s.limitUpQueue = int(m_cnt[0][m_limiter_up_queue_idx]);
-    s.limitDownQueue = int(m_cnt[0][m_limiter_down_queue_idx]);
-    s.queuedTrackerAnnounces = int(m_cnt[0][m_queued_tracker_announces]);
-    s.hasIncoming = int(m_cnt[0][m_has_incoming_idx]);
-    s.uptime = uptime();
-    s.uptimeMs = uptimeMs();
-    return std::move(s);
-}
-
-json::value
-sheath::get_stats_json()
-{
-    return json::value_from(getSessionStats());
+    return svs.getSessionStats();
 }
 
 void

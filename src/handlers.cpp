@@ -32,8 +32,8 @@ sbCall(http::request<string_body> const& req)
 {
 	if (req.target().find("/api/") == std::string_view::npos) return std::nullopt;
 	auto uri = req.target().substr(4);
-	if (req.method() == verb::get && uri == "/sess"sv) return handleSession(req);
-	if (req.method() == verb::get && uri == "/stats"sv) return handleStats(req);
+	if (req.method() == verb::get && uri == "/session/info"sv) return handleSessionInfo(req);
+	if (req.method() == verb::get && uri == "/session/stats"sv) return handleSessionStats(req);
 	if (uri == "/torrents"sv) return handleTorrents(req);
 
     if (uri.find("/torrent/") == 0) return handleTorrent(req, 13); // len(/api/torrent/) == 13
@@ -44,7 +44,7 @@ sbCall(http::request<string_body> const& req)
 
 http::response<string_body>
 httpCaller::
-handleSession(http::request<string_body> const& req)
+handleSessionInfo(http::request<string_body> const& req)
 {
 	auto const settings = shth_->sess()->get_settings();
 	auto const peerID = settings.get_str(lt::settings_pack::peer_fingerprint);
@@ -56,9 +56,9 @@ handleSession(http::request<string_body> const& req)
 
 http::response<string_body>
 httpCaller::
-handleStats(http::request<string_body> const& req)
+handleSessionStats(http::request<string_body> const& req)
 {
-	return make_resp<string_body>(req, json::serialize(shth_->get_stats_json()), ctJSON);
+	return make_resp<string_body>(req, json::serialize(json::value_from(shth_->getSessionStats())), ctJSON);
 }
 
 http::response<string_body>
