@@ -52,7 +52,7 @@ std::string
 resume_file(std::string const& cd, lt::sha1_hash const& info_hash);
 
 
-struct stats
+struct sessionStats
 {
     int64_t bytesRecv;
     int64_t bytesSent;
@@ -80,7 +80,7 @@ struct stats
 };
 
 void
-tag_invoke( json::value_from_tag, json::value& jv, stats const& s );
+tag_invoke( json::value_from_tag, json::value& jv, sessionStats const& s );
 
 json::object
 torrent_status_to_json_obj(lt::torrent_status const& st);
@@ -107,8 +107,8 @@ struct sheath : sessionValues
         return ses_;
     }
 
-    stats
-    get_stats();
+    sessionStats
+    getSessionStats();
 
     json::value
     get_stats_json();

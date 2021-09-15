@@ -127,7 +127,7 @@ load_sess_params(std::string const& cd, lt::session_params& params)
 
 
 void
-tag_invoke( json::value_from_tag, json::value& jv, stats const& s )
+tag_invoke( json::value_from_tag, json::value& jv, sessionStats const& s )
 {
     json::object obj;
     if (s.bytesRecv > 0) obj.emplace("bytesRecv", s.bytesRecv);
@@ -483,10 +483,10 @@ sheath::update_counters(lt::span<std::int64_t const> stats_counters, std::uint64
 }
 
 
-stats
-sheath::get_stats()
+sessionStats
+sheath::getSessionStats()
 {
-    struct stats s;
+    struct sessionStats s;
     if (m_cnt[0].size() < m_queued_tracker_announces)
     {
         std::cerr << "ctx empty stats: " << m_cnt[0].size() << std::endl;
@@ -529,7 +529,7 @@ sheath::get_stats()
 json::value
 sheath::get_stats_json()
 {
-    return json::value_from(get_stats());
+    return json::value_from(getSessionStats());
 }
 
 void
@@ -782,6 +782,7 @@ sheath::get_torrents()
     }
     return json::value(std::move(arr));
 }
+
 json::value
 sheath::get_torrent(lt::sha1_hash const& ih, query_flags_t flags)
 {
