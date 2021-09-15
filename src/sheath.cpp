@@ -216,7 +216,7 @@ sheath::sheath(std::shared_ptr<lt::session> const ses, std::string store_dir)
 }
 
 std::string
-sheath::resume_file(lt::sha1_hash const& info_hash)
+sheath::resume_file(lt::sha1_hash const& info_hash) const
 {
     auto file = dir_resumes / (to_hex(info_hash) + RESUME_EXT);
     return file.string();
@@ -396,8 +396,12 @@ sheath::handle_alert(lt::alert* a)
     }
     else if (state_update_alert* p = alert_cast<state_update_alert>(a))
     {
-        // do nothing
+        set_all_torrents(std::move(p->status));
         return true;
+    }
+    else if (torrent_removed_alert* p = alert_cast<torrent_removed_alert>(a))
+    {
+        remove_torrent_with_handle(std::move(p->handle));
     }
     // TODO: more alerts
 
@@ -434,10 +438,10 @@ sheath::pop_alerts()
 }
 
 
-sessionStats
-sheath::getSessionStats()
+json::value
+sheath::getSessionStats() const
 {
-    return svs.getSessionStats();
+    return json::value_from(svs.getSessionStats());
 }
 
 void
@@ -678,7 +682,7 @@ sheath::end()
 }
 
 json::value
-sheath::get_torrents()
+sheath::get_torrents() const
 {
     std::vector<lt::torrent_status> const torr = ses_->get_torrent_status(
                         [](lt::torrent_status const& st) { return true; }
@@ -692,7 +696,7 @@ sheath::get_torrents()
 }
 
 json::value
-sheath::get_torrent(lt::sha1_hash const& ih, query_flags_t flags)
+sheath::get_torrent(lt::sha1_hash const& ih, query_flags_t flags) const
 {
     auto th = ses_->find_torrent(ih);
     if (!th.is_valid())
@@ -809,6 +813,49 @@ sheath::drop_torrent(lt::sha1_hash const& ih, bool const with_data)
         return true;
     }
     return false;
+}
+
+void
+sheath::set_all_torrents(std::vector<lt::torrent_status> st)
+{
+    bool need_update = false;
+    for (lt::torrent_status& t : st)
+    {
+        auto j = m_all_handles.find(t.handle);
+        if (j == m_all_handles.end())
+        {
+            auto handle = t.handle;
+            m_all_handles.emplace(handle, std::move(t)); // add new
+        }
+        else
+        {
+            j->second = std::move(t); // update
+        }
+    }
+    // TODO: maybe notify
+}
+
+void
+sheath::remove_torrent_with_handle(lt::torrent_handle h)
+{
+    auto i = m_all_handles.find(h);
+    if (i == m_all_handles.end()) return;
+    m_all_handles.erase(i);
+    // TODO: maybe notify
+}
+
+json::value
+sheath::getSyncStats() const
+{
+    json::array allstats;
+    for (const auto& t : m_all_handles)
+    {
+        allstats.emplace_back(torrent_status_to_json_obj(t.second));
+    }
+    return json::value({
+         {"stats", svs.getSessionStats()}
+        ,{"torrents", allstats}
+    });
 }
 
 

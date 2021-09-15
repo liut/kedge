@@ -34,6 +34,7 @@ sbCall(http::request<string_body> const& req)
 	auto uri = req.target().substr(4);
 	if (req.method() == verb::get && uri == "/session/info"sv) return handleSessionInfo(req);
 	if (req.method() == verb::get && uri == "/session/stats"sv) return handleSessionStats(req);
+	if (req.method() == verb::get && uri == "/sync/stats"sv) return handleSyncStats(req);
 	if (uri == "/torrents"sv) return handleTorrents(req);
 
     if (uri.find("/torrent/") == 0) return handleTorrent(req, 13); // len(/api/torrent/) == 13
@@ -49,7 +50,7 @@ handleSessionInfo(http::request<string_body> const& req)
 	auto const settings = shth_->sess()->get_settings();
 	auto const peerID = settings.get_str(lt::settings_pack::peer_fingerprint);
 	auto const peerPort = parse_port(settings.get_str(lt::settings_pack::listen_interfaces));
-	const json::value jv= {{"peerID", peerID}, {"peerPort", peerPort}
+	const json::value jv = {{"peerID", peerID}, {"peerPort", peerPort}
         , {"uptime", uptime()}, {"uptimeMs", uptimeMs()}, {"version", lt::version()}};
     return make_resp<string_body>(req, json::serialize(jv), ctJSON);
 }
@@ -59,6 +60,13 @@ httpCaller::
 handleSessionStats(http::request<string_body> const& req)
 {
 	return make_resp<string_body>(req, json::serialize(json::value_from(shth_->getSessionStats())), ctJSON);
+}
+
+http::response<string_body>
+httpCaller::
+handleSyncStats(http::request<string_body> const& req)
+{
+	return make_resp<string_body>(req, json::serialize(shth_->getSyncStats()), ctJSON);
 }
 
 http::response<string_body>

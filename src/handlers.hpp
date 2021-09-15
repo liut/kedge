@@ -55,6 +55,9 @@ public:
     http::response<string_body>
     handleTorrent(http::request<string_body> const& req, size_t const offset);
 
+    http::response<string_body>
+    handleSyncStats(http::request<string_body> const& req);
+
 	void
 	join(websocket_session* session);
 

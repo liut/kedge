@@ -67,6 +67,7 @@ class sessionValues {
     int const m_queued_tracker_announces = lt::find_metric_idx("tracker.num_queued_tracker_announces");
 
 public:
+    explicit
     sessionValues()
     {
         std::vector<lt::stats_metric> metrics = lt::session_stats_metrics();

@@ -77,20 +77,20 @@ struct sheath
         return ses_;
     }
 
-    sessionStats
-    getSessionStats();
+    json::value
+    getSessionStats() const;
 
     json::value
-    get_torrents();
+    get_torrents() const;
     json::value
-    get_torrent(lt::sha1_hash const& ih, query_flags_t flags = query_basic);
+    get_torrent(lt::sha1_hash const& ih, query_flags_t flags = query_basic) const;
     bool
     exists(lt::sha1_hash const& ih);
     bool
     drop_torrent(lt::sha1_hash const& ih, bool const with_data);
 
     std::string
-    resume_file(lt::sha1_hash const& info_hash);
+    resume_file(lt::sha1_hash const& info_hash) const;
 
     bool
     set_peer(std::string const & addr);
@@ -112,6 +112,8 @@ struct sheath
     add_torrent(std::string filename);
     bool
     add_torrent(char const* buffer, int size, std::string const& save_path);
+    json::value
+    getSyncStats() const;
 
 private:
     void
@@ -129,6 +131,13 @@ private:
     void
     scan_dir(std::string const& dir_path);
 
+    void
+    remove_torrent_with_handle(const lt::torrent_handle th);
+    void
+    set_all_torrents(const std::vector<lt::torrent_status> st);
+    void
+    update_json_stats();
+
     std::shared_ptr<lt::session> const ses_;
     fs::path const dir_conf;
     fs::path const dir_store;
@@ -138,6 +147,8 @@ private:
     lt::tcp::endpoint* peer_ = nullptr; // prepared peer ip:port
 
     sessionValues  svs = sessionValues();
+    // all torrents
+    std::unordered_map<lt::torrent_handle, lt::torrent_status> m_all_handles;
 
     std::deque<std::string>& events;
 
