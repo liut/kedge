@@ -6,8 +6,8 @@ A bittorrent engine base on libtorrent-rasterbar with RESTful API
 JSON APIs
 ---
 
-* `GET` `/api/sess` current session information, 200
-* `GET` `/api/stats` statistices of session, 200
+* `GET` `/api/session/info` current session information, 200
+* `GET` `/api/session/stats` statistices of session, 200
 * `GET` `/api/torrents` show all torrents, 200
 * `POST` `/api/torrents` new task with torrent file in body, 204 | 500
 * `GET` `/api/torrent/{infohash}` show a torrent status, 200 | 404
