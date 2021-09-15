@@ -499,19 +499,22 @@ sheath::getSessionStats()
     s.numQueued = int(m_cnt[0][m_num_queued_seeding_idx] + m_cnt[0][m_num_queued_download_idx]);
     s.numError = int(m_cnt[0][m_num_error_idx]);
 
-    float const seconds = (m_timestamp[0] - m_timestamp[1]) / 1000000.f;
-
-    int const download_rate = int((m_cnt[0][m_recv_idx] - m_cnt[1][m_recv_idx])
-        / seconds);
-    int const upload_rate = int((m_cnt[0][m_sent_idx] - m_cnt[1][m_sent_idx])
-        / seconds);
-
     s.bytesRecv = std::uint64_t(m_cnt[0][m_recv_idx]);
     s.bytesSent = std::uint64_t(m_cnt[0][m_sent_idx]);
     s.bytesDataRecv = std::uint64_t(m_cnt[0][m_recv_data_idx]);
     s.bytesDataSent = std::uint64_t(m_cnt[0][m_send_data_idx]);
+
+    if (m_cnt[1].size() >= m_queued_tracker_announces)
+    {
+        float const seconds = (m_timestamp[0] - m_timestamp[1]) / 1000000.f;
+    int const download_rate = int((m_cnt[0][m_recv_idx] - m_cnt[1][m_recv_idx])
+        / seconds);
+    int const upload_rate = int((m_cnt[0][m_sent_idx] - m_cnt[1][m_sent_idx])
+        / seconds);
     s.rateRecv = download_rate;
     s.rateSent = upload_rate;
+    }
+
     s.bytesFailed = std::uint64_t(m_cnt[0][m_failed_bytes_idx]);
     s.bytesQueued = std::uint64_t(m_cnt[0][m_queued_bytes_idx]);
     s.bytesWasted = std::uint64_t(m_cnt[0][m_wasted_bytes_idx]);

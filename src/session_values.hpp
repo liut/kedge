@@ -7,7 +7,6 @@ namespace btd {
 
 struct sessionValues {
 
-    // TODO: unchecked
     int const m_num_checking_idx = lt::find_metric_idx("ses.num_checking_torrents");
     int const m_num_stopped_idx = lt::find_metric_idx("ses.num_stopped_torrents");
     int const m_num_upload_only_idx = lt::find_metric_idx("ses.num_upload_only_torrents");
