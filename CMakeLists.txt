@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.20)
 project(Kedge VERSION 0.0.2)
 
 # specify the C++ standard
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # set(CMAKE_BUILD_TYPE Debug)
@@ -119,7 +119,7 @@ else()
 	target_link_libraries(kedge PRIVATE stdc++fs "-static-libgcc" "-static-libstdc++" "-ldl")
 endif()
 
-target_compile_features(kedge PUBLIC cxx_std_17)
+target_compile_features(kedge PUBLIC cxx_std_20)
 
 add_definitions(-DBOOST_BEAST_USE_STD_STRING_VIEW)
 # add_definitions(-DTORRENT_DISABLE_ALERT_MSG)
