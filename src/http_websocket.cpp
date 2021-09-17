@@ -65,7 +65,7 @@ on_read(beast::error_code ec, std::size_t)
         return fail(ec, "ws on_read");
 
     // Send to all connections
-    caller_->send(beast::buffers_to_string(buffer_.data()));
+    caller_->broadcast(beast::buffers_to_string(buffer_.data()));
 
     // Clear the buffer
     buffer_.consume(buffer_.size());

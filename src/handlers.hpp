@@ -66,7 +66,7 @@ public:
 
 	// Broadcast a message to all websocket client sessions
 	void
-	send(std::string message);
+	broadcast(std::string message);
 
     std::string const&
     ui_root() const noexcept

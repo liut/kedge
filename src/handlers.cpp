@@ -167,7 +167,7 @@ leave(websocket_session* session)
 // Broadcast a message to all websocket client sessions
 void
 httpCaller::
-send(std::string message)
+broadcast(std::string message)
 {
     // Put the message in a shared pointer so we can re-use it for each client
     auto const ss = std::make_shared<std::string const>(std::move(message));
