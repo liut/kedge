@@ -1,11 +1,16 @@
 #pragma once
 
-#include "net.hpp"
+#include <boost/beast/core/bind_handler.hpp>
+#include <boost/beast/core/flat_buffer.hpp>
+#include <boost/beast/core/tcp_stream.hpp>
+#include <boost/beast/websocket/stream.hpp>
 
 #include <cstdlib>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "net.hpp"
 
 namespace btd {
 // Forward declaration

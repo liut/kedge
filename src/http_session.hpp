@@ -1,6 +1,12 @@
 #pragma once
 
 
+#include <boost/beast/core/flat_buffer.hpp>
+#include <boost/beast/http/parser.hpp>
+#include <boost/beast/http/file_body.hpp>
+#include <boost/beast/http/string_body.hpp>
+#include <boost/beast/core/tcp_stream.hpp>
+
 #include "net.hpp"
 
 #include <optional>

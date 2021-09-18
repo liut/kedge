@@ -1,5 +1,9 @@
 #pragma once
 
+#include <boost/beast/core/tcp_stream.hpp>
+#include <boost/beast/http/message.hpp>
+#include <boost/beast/http/string_body.hpp>
+
 #include <memory>
 #include <mutex>
 #include <optional>
