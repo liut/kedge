@@ -55,7 +55,7 @@ configure_file(src/config.h.in ../src/config.h)
 include_directories(${PROJECT_BINARY_BIN})
 
 # include
-include_directories( "include" "src" ${Boost_INCLUDE_DIRS})
+include_directories( "include" "src" ${Boost_INCLUDE_DIRS}, "deps/crow")
 
 # find_package(BZip2 REQUIRED)
 
@@ -119,7 +119,9 @@ else()
 	target_link_libraries(kedge PRIVATE stdc++fs "-static-libgcc" "-static-libstdc++" "-ldl")
 endif()
 
-target_compile_features(kedge PUBLIC cxx_std_20)
+# target_compile_features(kedge PUBLIC cxx_std_17)
 
-add_definitions(-DBOOST_BEAST_USE_STD_STRING_VIEW)
+add_definitions(-DBOOST_BEAST_USE_STD_STRING_VIEW -DLOG_LEVEL_DEBUG -DLOGGING_ENABLED)
+# add_compile_definitions(LOG_LEVEL_DEBUG)
+# add_compile_definitions(LOG_DEFAULT_LEVEL=0)
 # add_definitions(-DTORRENT_DISABLE_ALERT_MSG)

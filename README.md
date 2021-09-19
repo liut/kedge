@@ -60,6 +60,7 @@ curl http://localhost:16180/api/stats | jq
 * [Boost.Beast](https://github.com/boostorg/beast) http, websocket
 * [Boost.JSON](https://github.com/boostorg/json) new JSON relative to PropertyTree!
 * [Boost.ProgramOption](https://github.com/boostorg/program_options) config and options
+* [bmcweb](https://github.com/openbmc/bmcweb) logging
 
 ## Build
 
