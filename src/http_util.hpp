@@ -1,11 +1,10 @@
 #ifndef _HTTP_UTIL_HPP
 #define _HTTP_UTIL_HPP
 
+#include <boost/beast/http/message.hpp>
+#include <boost/beast/http/string_body.hpp>
 
 #include <string_view>
-
-#include <boost/json.hpp>
-namespace json = boost::json;
 
 #include "config.h"
 #include "net.hpp"

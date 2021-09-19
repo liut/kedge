@@ -12,7 +12,7 @@
 #include <vector>
 
 #include <boost/config.hpp>
-#include <boost/json.hpp>
+#include <boost/json/value.hpp>
 
 namespace json = boost::json;
 

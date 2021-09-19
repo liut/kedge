@@ -8,8 +8,6 @@
 #include <utility>
 
 #include <boost/asio/signal_set.hpp>
-// #include <boost/json.hpp>
-// namespace json = boost::json;
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
@@ -19,11 +17,11 @@ namespace po = boost::program_options;
 #include <libtorrent/version.hpp>
 
 
+#include "config.h"
 #include "handlers.hpp"
 #include "listener.hpp"
 #include "sheath.hpp"
 #include "util.hpp"
-#include "config.h"
 
 using namespace btd;
 

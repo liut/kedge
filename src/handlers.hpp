@@ -10,7 +10,7 @@
 #include <string_view>
 #include <unordered_set>
 
-#include <boost/json.hpp>
+#include <boost/json/value.hpp>
 namespace json = boost::json;
 
 #include <libtorrent/config.hpp>
