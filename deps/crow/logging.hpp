@@ -8,16 +8,8 @@
 #include <sstream>
 #include <string>
 
-#ifdef LOG_LEVEL_DEBUG
-#define LOG_DEFAULT_LEVEL 0
-#endif
-
 #ifndef LOG_DEFAULT_LEVEL
 #define LOG_DEFAULT_LEVEL 1
-#endif
-
-#ifdef LOGGING_ENABLED
-#define CROW_ENABLE_LOGGING 1
 #endif
 
 namespace crow
@@ -127,10 +119,3 @@ class Logger
 #define CROW_LOG_DEBUG                                                       \
     if (crow::Logger::getCurrentLogLevel() <= crow::LogLevel::Debug)           \
     crow::Logger("DEBUG", __FILE__, __LINE__, crow::LogLevel::Debug)
-
-#ifdef LOGGING_ENABLED
-#define LOG_DEBUG CROW_LOG_DEBUG
-#define LOG_ERROR CROW_LOG_ERROR
-#define LOG_INFO CROW_LOG_INFO
-#define LOG_WARNING CROW_LOG_WARNING
-#endif

@@ -14,6 +14,7 @@ namespace json = boost::json;
 #include <libtorrent/settings_pack.hpp>
 #include <libtorrent/version.hpp>
 
+#include "log.hpp"
 #include "handlers.hpp"
 #include "http_websocket.hpp"
 
@@ -81,7 +82,7 @@ handleTorrents(http::request<string_body> const& req) // get or post
 
 	if (req.method() == verb::post)
 	{
-		std::clog << " post clen " << req.find(http::field::content_length)->value() << " bytes\n";
+		LOG_DEBUG << " post clen " << req.find(http::field::content_length)->value() << " bytes\n";
 		auto savePath = req.find("x-save-path");
 		if (savePath == req.end())
 		{
@@ -90,7 +91,7 @@ handleTorrents(http::request<string_body> const& req) // get or post
 		const char* buf = req.body().data();
 		const int size = req.body().size();
 		const std::string dir(savePath->value());
-		std::clog << "post metainfo " << size << " bytes with save-path: '" << dir << "'\n";
+		LOG_DEBUG << "post metainfo " << size << " bytes with save-path: '" << dir << "'\n";
 		if (shth_->add_torrent(buf, size, dir))
 		{
 			return make_resp_204(req);

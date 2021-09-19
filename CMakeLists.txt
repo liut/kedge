@@ -55,7 +55,7 @@ configure_file(src/config.h.in ../src/config.h)
 include_directories(${PROJECT_BINARY_BIN})
 
 # include
-include_directories( "include" "src" ${Boost_INCLUDE_DIRS}, "deps/crow")
+include_directories( "include" "src" ${Boost_INCLUDE_DIRS}, "deps")
 
 # find_package(BZip2 REQUIRED)
 
