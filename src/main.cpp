@@ -164,8 +164,6 @@ int main(int argc, char* argv[])
     main_loader.join();
     std::cerr << "http server stopped" << std::endl;
 
-    ctx->end();
-
     set_logging(false);
     std::cerr << "closing session" << std::endl;
 

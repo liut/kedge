@@ -71,6 +71,11 @@ struct sheath
     explicit
     sheath(std::shared_ptr<lt::session> const ses, std::string store_dir);
 
+    ~sheath()
+    {
+        end();
+    }
+
     std::shared_ptr<lt::session> const&
     sess() const noexcept
     {
