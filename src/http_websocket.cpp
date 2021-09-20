@@ -66,7 +66,6 @@ on_accept(beast::error_code ec)
             &websocket_session::on_read,
             shared_from_this()));
 
-    loopSync();
 }
 
 void
@@ -172,48 +171,6 @@ close(const std::string_view msg)
     closed = true;
     // websocket::close_reason cr("direct close");
     // ws_.close(cr);
-}
-
-void
-websocket_session::
-loopSync()
-{
-    LOG_DEBUG << "ws start sync: " << uri_.data() << '\n';
-    static std::atomic_uint sync_ver = 0;
-    sync_ver ++;
-    json::value prev_stats = json::value(nullptr);
-    auto stats = caller_->getSyncStats();
-
-    // first message
-    json::value jv({
-        {"version", sync_ver.load()}
-        ,{"id", n2hex(randNum(1000, 9999))}
-        ,{"body", stats}
-    });
-    beast::error_code ec;
-    // auto ss = std::make_shared<std::string const>(json::serialize(jv));
-    // send(ss);
-    ws_.write(net::buffer(json::serialize(jv)), ec);
-    if(ec) return fail(ec, "ws loopSync write");
-    LOG_DEBUG << "sent first: " << sync_ver.load();
-
-    while(ws_.is_open() && !closed && !quit) // TODO: get stop signal
-    {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        sync_ver ++;
-        stats = caller_->getSyncStats();
-        json::value jv({
-            {"version", sync_ver.load()}
-            ,{"delta", true}
-            ,{"body", diff(prev_stats, stats)}
-        });
-        // send(std::make_shared<std::string const>(json::serialize(jv)));
-        ws_.write(net::buffer(json::serialize(jv)), ec);
-        if(ec) return fail(ec, "ws loopSync write");
-        std::clog << sync_ver.load() << " ";
-        prev_stats = stats;
-    }
-    std::clog << '\n';
 }
 
 

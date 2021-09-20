@@ -9,6 +9,7 @@
 #include <boost/json/value.hpp>
 namespace json = boost::json;
 #include <boost/json/serialize.hpp>
+#include "json_diff.hpp"
 
 #include <libtorrent/config.hpp>
 #include <libtorrent/settings_pack.hpp>
@@ -152,18 +153,27 @@ handleTorrent(http::request<string_body> const& req, size_t const offset)
 
 void
 httpCaller::
-join(websocket_session* session)
+join(websocket_session* wss)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    sessions_.insert(session);
+    sessions_.insert(wss);
+    sync_ver ++;
+    if (curr_stats.is_null()) curr_stats = getSyncStats();
+    json::value jv({
+        {"version", sync_ver.load()}
+        ,{"id", n2hex(randNum(1000, 9999))}
+        ,{"body", curr_stats}
+    });
+    LOG_DEBUG << "ws joinning " << sync_ver.load();
+    wss->send(std::make_shared<std::string const>(json::serialize(jv)));
 }
 
 void
 httpCaller::
-leave(websocket_session* session)
+leave(websocket_session* wss)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    sessions_.erase(session);
+    sessions_.erase(wss);
 }
 
 // Broadcast a message to all websocket client sessions
@@ -208,5 +218,27 @@ getSyncStats()
 	return shth_->getSyncStats();
 }
 
+void
+httpCaller::
+doLoop()
+{
+    if (sessions_.empty())
+    {
+    	std::this_thread::sleep_for(std::chrono::seconds(30));
+    	return;
+    }
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    sync_ver ++;
+    curr_stats = shth_->getSyncStats();
+    json::value jv({
+        {"version", sync_ver.load()}
+        ,{"delta", true}
+        ,{"body", diff(prev_stats, curr_stats)}
+    });
+    broadcast(json::serialize(jv));
+    std::clog << sync_ver.load() << " ";
+	prev_stats = curr_stats;
+
+}
 
 } // namespace btd

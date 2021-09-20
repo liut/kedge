@@ -135,12 +135,19 @@ int main(int argc, char* argv[])
             ioc.run();
         });
 
-    std::thread main_loader([&ctx, &ioc] {
+    std::thread shth_loader([&ctx, &ioc] {
         while (!quit)
         {
-            ctx->do_loop();
+            ctx->doLoop();
         }
         ioc.stop();
+    });
+
+    std::thread caller_loader([&caller] {
+        while (!quit)
+        {
+            caller->doLoop();
+        }
     });
 
     std::cerr << "http server running" << std::endl;
@@ -158,7 +165,8 @@ int main(int argc, char* argv[])
     std::cerr << '\n';
 
     ctx_start_loader.join();
-    main_loader.join();
+    shth_loader.join();
+    caller_loader.join();
     std::cerr << "http server stopped" << std::endl;
 
     set_logging(false);

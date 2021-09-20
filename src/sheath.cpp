@@ -142,6 +142,9 @@ torrent_status_to_json_obj(lt::torrent_status const& st)
         , { "is_finished", st.is_finished }
         , { "progress", st.progress }
         , { "progress_ppm", st.progress_ppm }
+        , { "rates", st.download_payload_rate + st.upload_payload_rate}
+        , { "total_done", st.total_done }     // completed bytes
+        , { "total_wanted", st.total_wanted } // total bytes
     });
     if (st.completed_time > 0) obj.emplace("completed_time", st.completed_time);
 
@@ -158,10 +161,10 @@ torrent_status_to_json_obj(lt::torrent_status const& st)
     if (st.total_payload_upload > 0) obj.emplace("total_payload_upload", st.total_payload_upload); // this session
     if (st.total_failed_bytes > 0) obj.emplace("total_failed_bytes", st.total_failed_bytes); // since last started
     if (st.total_redundant_bytes > 0) obj.emplace("total_redundant_bytes", st.total_redundant_bytes);
-    if (st.total_done > 0) obj.emplace("total_done", st.total_done);
+    // if (st.total_done > 0) obj.emplace("total_done", st.total_done);
     if (st.total > 0) obj.emplace("total", st.total); // zero
     if (st.total_wanted_done > 0) obj.emplace("total_wanted_done", st.total_wanted_done);
-    if (st.total_wanted > 0) obj.emplace("total_wanted", st.total_wanted);
+    // if (st.total_wanted > 0) obj.emplace("total_wanted", st.total_wanted);
 
     if (st.last_seen_complete > 0) obj.emplace("last_seen_complete", st.last_seen_complete);
     if (st.last_download > hr_min) obj.emplace("last_download", duration_cast<seconds>(st.last_download.time_since_epoch()).count());
@@ -616,7 +619,7 @@ sheath::scan_dir(std::string const& dir_path)
 }
 
 void
-sheath::do_loop()
+sheath::doLoop()
 {
     using namespace std::chrono;
     ses_->post_torrent_updates();

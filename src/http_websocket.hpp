@@ -54,8 +54,6 @@ public:
     // Send a message
     void
     send(std::shared_ptr<std::string const> const& ss);
-    void
-    loopSync();
 
 private:
     void

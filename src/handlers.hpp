@@ -27,6 +27,8 @@ namespace btd {
 // Forward declaration
 class websocket_session;
 
+static std::atomic_uint sync_ver = 0;
+
 class httpCaller : public std::enable_shared_from_this<httpCaller>
 {
 	// sheath of libtorrent session
@@ -40,6 +42,10 @@ class httpCaller : public std::enable_shared_from_this<httpCaller>
 
     // Keep a list of all the connected clients
     std::unordered_set<websocket_session*> sessions_;
+
+    // for save sync stats
+    json::value prev_stats = json::value(nullptr);
+    json::value curr_stats = json::value(nullptr);
 
 public:
 
@@ -77,6 +83,9 @@ public:
 
     void
     closeWS();
+
+    void
+    doLoop();
 
     std::string const&
     ui_root() const noexcept
