@@ -14,6 +14,7 @@ JSON APIs
 * `GET` `/api/torrent/{infohash}/{act}` act=(files|peers), 200 | 404
 * `HEAD` `/api/torrent/{infohash}`, 204 | 404
 * `DELETE` `/api/torrent/{infohash}` remove a torrent, 204 | 404
+* `GET` `/api/sync` with Websocket only! response as json patch format.
 
 **`infohash`: 40 bytes**
 

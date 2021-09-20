@@ -107,7 +107,7 @@ struct sheath
     void
     start();
     void
-    do_loop();
+    doLoop();
     void
     end();
 

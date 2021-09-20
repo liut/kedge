@@ -1,8 +1,6 @@
 
-// #include <algorithm>
 #include <atomic>
 #include <chrono>
-// #include <csignal>
 #include <cstdlib>
 #include <thread>
 #include <utility>
@@ -24,8 +22,6 @@ namespace po = boost::program_options;
 #include "util.hpp"
 
 using namespace btd;
-
-static std::atomic_bool quit(false);
 
 std::string mapper(std::string env_var)
 {
@@ -139,17 +135,25 @@ int main(int argc, char* argv[])
             ioc.run();
         });
 
-    std::thread main_loader([&ctx, &ioc] {
+    std::thread shth_loader([&ctx, &ioc] {
         while (!quit)
         {
-            ctx->do_loop();
+            ctx->doLoop();
         }
         ioc.stop();
+    });
+
+    std::thread caller_loader([&caller] {
+        while (!quit)
+        {
+            caller->doLoop();
+        }
     });
 
     std::cerr << "http server running" << std::endl;
     ioc.run(); // forever
     std::cerr << "http server ran ?" << std::endl;
+    caller->closeWS();
 
     // Block until all the threads exit
     std::cerr << "thread joinning";
@@ -161,7 +165,8 @@ int main(int argc, char* argv[])
     std::cerr << '\n';
 
     ctx_start_loader.join();
-    main_loader.join();
+    shth_loader.join();
+    caller_loader.join();
     std::cerr << "http server stopped" << std::endl;
 
     set_logging(false);

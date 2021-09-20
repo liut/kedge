@@ -38,7 +38,9 @@ public:
     json::object
     to_json_object() const
     {
-    	json::object obj;
+    	json::object obj({
+    		{"rates", bytesRecv + bytesSent}
+    	});
 
 	    if (bytesRecv > 0) obj.emplace("bytesRecv", bytesRecv);
 	    if (bytesSent > 0) obj.emplace("bytesSent", bytesSent);

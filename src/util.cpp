@@ -4,6 +4,7 @@
 #include <cstdio> // FILE
 #include <chrono> // time and clock
 #include <mutex>
+#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <thread>
@@ -279,5 +280,16 @@ pptime(std::time_t const & t)
     return " - ";
     // return std::string(std::put_time(std::localtime(&t), "%Y%m%d %H:%M"));
 }
+
+std::uint32_t
+randNum(std::uint32_t min, std::uint32_t max)
+{
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution<std::mt19937::result_type> distrib(min, max);
+    return distrib(rng);
+}
+
+
 
 } // namespace
