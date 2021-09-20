@@ -18,6 +18,7 @@
 #include "util.hpp"
 // #include "http_ws_session.hpp"
 #include "config.h"
+#include "log.hpp"
 
 namespace btd {
 // using namespace std;
@@ -38,7 +39,7 @@ parse_endpoint(lt::tcp::endpoint & ep, std::string addr)
             auto host = lt::address::from_string(ip, ec);
             if (ec)
             {
-                fprintf(stderr, "invalid ip: '%s'\n", ip);
+                LOG_ERROR << "invalid ip: " << addr;
                 return false;
             }
             if (peer_port > 0) {
@@ -64,8 +65,7 @@ prepare_dirs(std::string const & cd)
         std::error_code ec;
         if (!fs::create_directory(p, ec) && ec.value() != 0)
         {
-            // LOG_ERROR << "failed to create directory " << ec.message() << std::endl;
-            std::fprintf(stderr, "failed to create directory: %s reason '%s'\n", p.c_str(), ec.message().c_str());
+            LOG_ERROR << "failed to create directory " << p " reason" << ec.message();
             return false;
         }
     }
@@ -231,12 +231,12 @@ sheath::load_resumes()
     auto it = fs::directory_iterator(dir_resumes, ec);
     if (ec)
     {
-        std::fprintf(stderr, "failed to list resume directory \"%s\": (%s : %d) %s\n"
-            , dir_resumes.c_str(), ec.category().name(), ec.value(), ec.message().c_str());
+        LOG_ERROR << "failed to list directory: " << dir_resumes
+                  << " " << ec << " " << ec.message();
         return;
     }
 
-    std::fprintf(stderr, "resume directory: '%s' found\n", dir_resumes.c_str());
+    LOG_DEBUG << "resumes from: " << dir_resumes;
     for (auto const& e : it)
     {
         auto start = steady_clock::now();
@@ -588,29 +588,28 @@ sheath::add_torrent(char const* buffer, int size, std::string const& save_path)
 void
 sheath::scan_dir(std::string const& dir_path)
 {
-    using namespace lt;
-
-    error_code ec;
-    std::vector<std::string> ents = list_dir(dir_path
-        , [](lt::string_view p) { return p.size() > 8 && p.substr(p.size() - 8) == ".torrent"; }, ec);
+    std::error_code ec;
+    auto it = fs::directory_iterator(dir_path, ec);
     if (ec)
     {
-        std::fprintf(stderr, "failed to list directory: (%s : %d) %s\n"
-            , ec.category().name(), ec.value(), ec.message().c_str());
+        LOG_ERROR << "failed to list directory: " << dir_path
+                  << " " << ec << " " << ec.message();
         return;
     }
-
-    for (auto const& e : ents)
+    for (const auto & de : it)
     {
-        std::string const file = path_cat(dir_path, e);
-
-        // there's a new file in the monitor directory, load it up
-        if (add_torrent(file))
+        const auto file = de.path();
+        if (file.extension() != ".torrent")
         {
-            if (::remove(file.c_str()) < 0)
+            LOG_INFO << "invalid torrent file: " << file;
+            continue;
+        }
+        // there's a new file in the monitor directory, load it up
+        if (add_torrent(file.string()))
+        {
+            if (!fs::remove(file))
             {
-                std::fprintf(stderr, "failed to remove torrent file: \"%s\"\n"
-                    , file.c_str());
+                LOG_ERROR << "failed to remove torrent file: " << file;
             }
         }
     }

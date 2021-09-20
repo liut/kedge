@@ -141,56 +141,6 @@ int save_file(std::string const& filename, std::vector<char> const& v)
     return !f.fail();
 }
 
-// TODO: refactory with fs
-std::vector<std::string> list_dir(std::string path
-    , bool (*filter_fun)(lt::string_view)
-    , lt::error_code& ec)
-{
-    std::vector<std::string> ret;
-#ifdef TORRENT_WINDOWS
-    if (!path.empty() && path[path.size()-1] != '\\') path += "\\*";
-    else path += "*";
-
-    WIN32_FIND_DATAA fd;
-    HANDLE handle = FindFirstFileA(path.c_str(), &fd);
-    if (handle == INVALID_HANDLE_VALUE)
-    {
-        ec.assign(GetLastError(), boost::system::system_category());
-        return ret;
-    }
-
-    do
-    {
-        lt::string_view p = fd.cFileName;
-        if (filter_fun(p))
-            ret.push_back(p.to_string());
-
-    } while (FindNextFileA(handle, &fd));
-    FindClose(handle);
-#else
-
-    if (!path.empty() && path[path.size()-1] == '/')
-        path.resize(path.size()-1);
-
-    DIR* handle = opendir(path.c_str());
-    if (handle == nullptr)
-    {
-        ec.assign(errno, boost::system::system_category());
-        return ret;
-    }
-
-    struct dirent* de;
-    while ((de = readdir(handle)))
-    {
-        lt::string_view p(de->d_name);
-        if (filter_fun(p))
-            ret.push_back(p.to_string());
-    }
-    closedir(handle);
-#endif
-    return ret;
-}
-
 
 std::string const
 path_cat(std::string_view const& base, std::string_view const& path)

@@ -35,9 +35,6 @@ load_file(std::string const& filename, std::vector<char>& v, int limit = 8000000
 int
 save_file(std::string const& filename, std::vector<char> const& v);
 
-std::vector<std::string>
-list_dir(std::string path, bool (*filter_fun)(lt::string_view), lt::error_code& ec);
-
 std::string const
 path_cat(std::string_view const& base, std::string_view const& path);
 
