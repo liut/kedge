@@ -1,8 +1,6 @@
 
-// #include <algorithm>
 #include <atomic>
 #include <chrono>
-// #include <csignal>
 #include <cstdlib>
 #include <thread>
 #include <utility>
@@ -24,8 +22,6 @@ namespace po = boost::program_options;
 #include "util.hpp"
 
 using namespace btd;
-
-static std::atomic_bool quit(false);
 
 std::string mapper(std::string env_var)
 {
@@ -150,6 +146,7 @@ int main(int argc, char* argv[])
     std::cerr << "http server running" << std::endl;
     ioc.run(); // forever
     std::cerr << "http server ran ?" << std::endl;
+    caller->closeWS();
 
     // Block until all the threads exit
     std::cerr << "thread joinning";

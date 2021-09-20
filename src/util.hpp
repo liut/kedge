@@ -2,6 +2,8 @@
 
 #include <cstdint>
 #include <ctime>
+#include <iostream>
+#include <random>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -14,6 +16,8 @@
 #include "config.h"
 
 namespace btd {
+
+static std::atomic_bool quit(false);
 
 namespace fs = std::filesystem;
 
@@ -76,5 +80,25 @@ parse_port(std::string const& addr) noexcept;
 
 std::string
 pptime(std::time_t const & t);
+
+std::uint32_t
+randNum(std::uint32_t min = 1000, std::uint32_t max = 9999);
+
+template<typename T>
+std::string
+n2hex(T i)
+{
+  std::stringstream stream;
+  stream << std::setfill ('0') << std::setw(sizeof(T)*2)
+         << std::hex << i;
+  return stream.str();
+}
+
+template <typename Enumeration>
+auto asValue(Enumeration const value)
+    -> typename std::underlying_type<Enumeration>::type
+{
+    return static_cast<typename std::underlying_type<Enumeration>::type>(value);
+}
 
 } // namespace btd

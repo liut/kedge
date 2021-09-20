@@ -192,6 +192,21 @@ broadcast(std::string message)
             sp->send(ss);
 }
 
+void
+httpCaller::
+closeWS()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+	for(auto p : sessions_)
+		p->close("close by caller");
+}
+
+json::value
+httpCaller::
+getSyncStats()
+{
+	return shth_->getSyncStats();
+}
 
 
 } // namespace btd

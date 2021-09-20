@@ -62,6 +62,9 @@ public:
     http::response<string_body>
     handleSyncStats(http::request<string_body> const& req);
 
+    json::value
+    getSyncStats();
+
 	void
 	join(websocket_session* session);
 
@@ -71,6 +74,9 @@ public:
 	// Broadcast a message to all websocket client sessions
 	void
 	broadcast(std::string message);
+
+    void
+    closeWS();
 
     std::string const&
     ui_root() const noexcept
