@@ -65,7 +65,7 @@ prepare_dirs(std::string const & cd)
         std::error_code ec;
         if (!fs::create_directory(p, ec) && ec.value() != 0)
         {
-            LOG_ERROR << "failed to create directory " << p " reason" << ec.message();
+            LOG_ERROR << "failed to create directory " << p << " reason" << ec.message();
             return false;
         }
     }

@@ -3,7 +3,6 @@
 #include <cstdarg> // va_start, va_end
 #include <cstdio> // FILE
 #include <chrono> // time and clock
-#include <dirent.h> // readdir
 #include <mutex>
 #include <fstream>
 #include <sstream>
