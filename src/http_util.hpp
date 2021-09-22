@@ -98,6 +98,48 @@ mime_type(std::string_view path)
     return "application/text";
 }
 
+inline std::string
+url_decode(const std::string& value)
+{
+    std::string result;
+    result.reserve(value.size());
+
+    for (std::size_t i = 0; i < value.size(); ++i)
+    {
+        auto ch = value[i];
+
+        if (ch == '%' && (i + 2) < value.size())
+        {
+            auto hex = value.substr(i + 1, 2);
+            auto dec = static_cast<char>(std::strtol(hex.c_str(), nullptr, 16));
+            result.push_back(dec);
+            i += 2;
+        }
+        else if (ch == '+')
+        {
+            result.push_back(' ');
+        }
+        else
+        {
+            result.push_back(ch);
+        }
+    }
+
+    return result;
+}
+
+inline std::string
+query_arg_one(const std::string & uri, const std::string & keypre)
+{
+	auto pos = uri.find(keypre);
+	if (pos == std::string::npos)
+	{
+		return "";
+	}
+	auto v = uri.substr(pos+keypre.size(), uri.find("&", pos));
+	return v;
+}
+
 } // namespace btd
 
 #endif // _HTTP_UTIL_HPP

@@ -158,10 +158,12 @@ join(websocket_session* wss)
     std::lock_guard<std::mutex> lock(mutex_);
     sessions_.insert(wss);
     sync_ver ++;
+    auto qid = wss->qid();
+    if (qid.empty()) qid = n2hex(randNum(1000, 9999));
     if (curr_stats.is_null()) curr_stats = getSyncStats();
     json::value jv({
         {"version", sync_ver.load()}
-        ,{"id", n2hex(randNum(1000, 9999))}
+        ,{"id", qid}
         ,{"body", curr_stats}
     });
     LOG_DEBUG << "ws joinning " << sync_ver.load();
@@ -236,7 +238,7 @@ doLoop()
         ,{"body", diff(prev_stats, curr_stats)}
     });
     broadcast(json::serialize(jv));
-    std::clog << sync_ver.load() << " ";
+    // std::clog << sync_ver.load() << " ";
 	prev_stats = curr_stats;
 
 }

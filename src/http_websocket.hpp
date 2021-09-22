@@ -15,6 +15,7 @@
 #include "net.hpp"
 #include "log.hpp"
 #include "util.hpp"
+#include "http_util.hpp"
 
 namespace btd {
 
@@ -31,7 +32,8 @@ class websocket_session : public std::enable_shared_from_this<websocket_session>
     websocket::stream<beast::tcp_stream> ws_;
     std::shared_ptr<httpCaller> caller_;
     std::vector<std::shared_ptr<std::string const>> queue_;
-    std::string_view uri_;
+    std::string uri_;
+    std::string qid_;
 
     bool closed = false;
 
@@ -54,6 +56,11 @@ public:
     // Send a message
     void
     send(std::shared_ptr<std::string const> const& ss);
+    std::string
+    qid() const
+    {
+        return qid_;
+    }
 
 private:
     void
@@ -65,8 +72,9 @@ void
 websocket_session::
 run(http::request<Body, http::basic_fields<Allocator>> const& req)
 {
-    uri_ = req.target();
-    std::clog << "ws run: " << uri_.data() << '\n';
+    uri_ = {req.target().data(), req.target().size()};
+    qid_ = url_decode(query_arg_one(uri_, "id="));
+    LOG_DEBUG << "ws run: '" << uri_ << "' qid: " << qid_;
     // Set suggested timeout settings for the websocket
     ws_.set_option(
         websocket::stream_base::timeout::suggested(
