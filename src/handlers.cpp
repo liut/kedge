@@ -224,10 +224,10 @@ doLoop()
 {
     if (sessions_.empty())
     {
-    	std::this_thread::sleep_for(std::chrono::seconds(30));
+    	std::this_thread::sleep_for(std::chrono::seconds(20));
     	return;
     }
-    std::this_thread::sleep_for(std::chrono::seconds(2));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     sync_ver ++;
     curr_stats = shth_->getSyncStats();
     json::value jv({
