@@ -16,7 +16,9 @@ JSON APIs
 * `DELETE` `/api/torrent/{infohash}` remove a torrent, 204 | 404
 * `GET` `/api/sync` Websocket only! response using [JSON-patch](https://tools.ietf.org/html/rfc6902) format (see [velox](https://github.com/jpillora/velox)).
 
-**note: `infohash` has 40 bytes string**
+**note: `infohash` has 40 bytes string with hex format**
+
+If you want to experience these APIs please check the official web UI [kedge-svelte](https://github.com/liut/kedge-svelte) that support them.
 
 Plans
 ---
