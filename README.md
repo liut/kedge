@@ -14,13 +14,15 @@ JSON APIs
 * `GET` `/api/torrent/{infohash}/{act}` act=(files|peers), 200 | 404
 * `HEAD` `/api/torrent/{infohash}`, 204 | 404
 * `DELETE` `/api/torrent/{infohash}` remove a torrent, 204 | 404
-* `GET` `/api/sync` with Websocket only! response as json patch format.
+* `GET` `/api/sync` Websocket only! response using [JSON-patch](https://tools.ietf.org/html/rfc6902) format (see [velox](https://github.com/jpillora/velox)).
 
-**`infohash`: 40 bytes**
+**note: `infohash` has 40 bytes string**
 
-TODO
+Plans
 ---
-* split logs with alert types
+* Support for Add a new task by magnet link.
+* Support optional actions such as moving folder when task is completed.
+* <del>Split logs with alert types?</del>.
 
 
 ## API Test
