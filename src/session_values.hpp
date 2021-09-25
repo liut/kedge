@@ -111,7 +111,7 @@ public:
         s.bytesDataRecv = std::uint64_t(m_cnt[0][m_recv_data_idx]);
         s.bytesDataSent = std::uint64_t(m_cnt[0][m_send_data_idx]);
 
-        if (m_cnt[1].size() >= m_queued_tracker_announces)
+        if (m_cnt[1].size() >= m_send_data_idx)
         {
             float const seconds = (m_timestamp[0] - m_timestamp[1]) / 1000000.f;
             int const download_rate = int((m_cnt[0][m_recv_idx] - m_cnt[1][m_recv_idx])
