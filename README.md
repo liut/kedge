@@ -95,6 +95,7 @@ cd tools/build
 ./b2 -j12 --build-dir=build --prefix=/opt/boost --with=all cxxstd=17 toolset=clang variant=release install
 
 # donwload libtorrent and uncompress it into ~/tmp
+# Or git clone -b RC_1_2 https://github.com/arvidn/libtorrent.git
 cd libtorrent
 
 /opt/boost/bin/b2 -j12 --prefix=/opt/lt12 cxxstd=17 variant=release crypto=openssl link=static runtime-link=static install
@@ -102,7 +103,8 @@ cd libtorrent
 
 ### compile
 ```bash
-rm -rf build && mkdir build && cd build
+test -e build && rm -rf build
+mkdir build && cd build
 cmake ..
 make -j6
 ```
