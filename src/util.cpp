@@ -26,7 +26,7 @@
 namespace btd {
 using namespace std::chrono;
 static std::time_t start_up = std::time(0);
-static time_point start_up_c = high_resolution_clock::now();
+static time_point start_up_c = system_clock::now();
 
 std::time_t
 now()
@@ -43,7 +43,7 @@ uptime()
 std::int64_t
 uptimeMs()
 {
-    auto cur_c = high_resolution_clock::now();
+    auto cur_c = system_clock::now();
     auto int_ms = duration_cast<milliseconds>(cur_c - start_up_c);
     return int_ms.count();
 }
