@@ -61,7 +61,7 @@ tag_invoke( json::value_from_tag, json::value& jv, lt::torrent_status const& st)
 using query_flags_t = std::uint16_t;
 
 // Represents the shared server state
-struct sheath
+struct sheath : public std::enable_shared_from_this<sheath>
 {
 
     static constexpr query_flags_t query_basic = 1;
