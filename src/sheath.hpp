@@ -83,6 +83,8 @@ struct sheath : public std::enable_shared_from_this<sheath>
     }
 
     json::value
+    getSessionInfo() const;
+    json::value
     getSessionStats() const;
 
     json::value

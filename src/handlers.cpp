@@ -12,8 +12,6 @@ namespace json = boost::json;
 #include "json_diff.hpp"
 
 #include <libtorrent/config.hpp>
-#include <libtorrent/settings_pack.hpp>
-#include <libtorrent/version.hpp>
 
 #include "log.hpp"
 #include "handlers.hpp"
@@ -50,19 +48,14 @@ http::response<string_body>
 httpCaller::
 handleSessionInfo(http::request<string_body> const& req)
 {
-	auto const settings = shth_->sess()->get_settings();
-	auto const peerID = settings.get_str(lt::settings_pack::peer_fingerprint);
-	auto const peerPort = parse_port(settings.get_str(lt::settings_pack::listen_interfaces));
-	const json::value jv = {{"peerID", peerID}, {"peerPort", peerPort}
-        , {"uptime", uptime()}, {"uptimeMs", uptimeMs()}, {"version", lt::version()}};
-    return make_resp<string_body>(req, json::serialize(jv), ctJSON);
+    return make_resp<string_body>(req, json::serialize(shth_->getSessionInfo()), ctJSON);
 }
 
 http::response<string_body>
 httpCaller::
 handleSessionStats(http::request<string_body> const& req)
 {
-	return make_resp<string_body>(req, json::serialize(json::value_from(shth_->getSessionStats())), ctJSON);
+	return make_resp<string_body>(req, json::serialize(shth_->getSessionStats()), ctJSON);
 }
 
 http::response<string_body>
@@ -176,6 +169,7 @@ leave(websocket_session* wss)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     sessions_.erase(wss);
+    LOG_DEBUG << "ws leaved";
 }
 
 // Broadcast a message to all websocket client sessions

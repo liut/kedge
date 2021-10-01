@@ -13,10 +13,6 @@
 #include <boost/json/value.hpp>
 namespace json = boost::json;
 
-#include <libtorrent/config.hpp>
-#include <libtorrent/settings_pack.hpp>
-#include <libtorrent/version.hpp>
-
 #include "sheath.hpp"
 #include "net.hpp"
 #include "http_util.hpp"

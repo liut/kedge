@@ -442,6 +442,21 @@ sheath::pop_alerts()
 
 
 json::value
+sheath::getSessionInfo() const
+{
+    auto const settings = ses_->get_settings();
+    auto const peerID = settings.get_str(lt::settings_pack::peer_fingerprint);
+    auto const listenIfs = settings.get_str(lt::settings_pack::listen_interfaces);
+    auto const peerPort = parse_port(listenIfs);
+    const json::value jv = {
+          {"peerID", peerID}, {"peerPort", peerPort}, {"listenInterfaces", listenIfs}
+        , {"uptime", uptime()}, {"uptimeMs", uptimeMs()}
+        , {"stored", dir_store.string()}
+        , {"version", lt::version()}};
+    return std::move(jv);
+}
+
+json::value
 sheath::getSessionStats() const
 {
     return json::value_from(svs.getSessionStats());
