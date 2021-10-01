@@ -725,7 +725,6 @@ sheath::get_torrent(lt::sha1_hash const& ih, query_flags_t flags) const
             json::object obj({
                  {"client", i->client}
                 ,{"ip", addr.to_string()}
-                ,{"ip", addr.to_string()}
                 ,{"port", i->ip.port()}
                 ,{"flag", static_cast<int>(i->flags)}
                 ,{"source", static_cast<int>(i->source)}
