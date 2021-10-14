@@ -20,6 +20,7 @@ namespace po = boost::program_options;
 #include "listener.hpp"
 #include "sheath.hpp"
 #include "util.hpp"
+#include "log.hpp"
 
 using namespace btd;
 
@@ -29,6 +30,7 @@ std::string mapper(std::string env_var)
    std::transform(env_var.begin(), env_var.end(), env_var.begin(), ::toupper);
 
    if (env_var == "LT_PEERID_PREFIX" || env_var == "TR_PEERID_PREFIX") return "peer-id";
+   if (env_var == "KEDGE_STORE_ROOT") return "store-root";
    if (env_var == "DHT_BOOTSTRAP_NODES") return "dht-bootstrap-nodes";
    return "";
 }
@@ -40,11 +42,13 @@ int main(int argc, char* argv[])
 
     std::string peerID = "";
     std::string listens = "";
+    std::string storeRoot = "";
 
     po::options_description config("Configuration");
     config.add_options()
         ("help,h", "print usage message")
         ("listens", po::value<std::string>(&listens)->default_value("0.0.0.0:6881"), "listen_interfaces")
+        ("store-root", po::value<std::string>(&storeRoot)->default_value(getStoreDir()), "store root, env: KEDGE_STORE_ROOT")
         ("peer-id", po::value<std::string>(&peerID)->default_value("-LT-"), "set prefix of fingerprint, env: LT_PEERID_PREFIX")
         ("dht-bootstrap-nodes", po::value<std::string>(), "a comma-separated list of IP port-pairs. env: DHT_BOOTSTRAP_NODES")
         ;
@@ -74,13 +78,17 @@ int main(int argc, char* argv[])
     // std::uint16_t peerPort = parse_port(listens);
     if (vm.count("listens"))
     {
-        std::clog << "set listens " << listens << '|' << vm["listens"].as<std::string>() << '\n';
+        LOG_DEBUG << "set listens " << listens << '|' << vm["listens"].as<std::string>() << '\n';
         params.settings.set_str(settings_pack::listen_interfaces, vm["listens"].as<std::string>());
     }
     if (vm.count("peer-id"))
     {
-        std::clog << "set peerID " << peerID << '\n';
+        LOG_DEBUG << "set peerID " << peerID << '\n';
         params.settings.set_str(settings_pack::peer_fingerprint, peerID);
+    }
+    if (vm.count("store-root"))
+    {
+        LOG_DEBUG << "set storeRoot " << storeRoot << '\n';
     }
     if (vm.count("dht-bootstrap-nodes"))
     {
@@ -88,7 +96,7 @@ int main(int argc, char* argv[])
     }
     const auto ses = std::make_shared<lt::session>(std::move(params));
 
-    const auto ctx = std::make_shared<sheath>(ses, getStoreDir());
+    const auto ctx = std::make_shared<sheath>(ses, storeRoot);
 
     std::thread ctx_start_loader([&ctx] {
         ctx->start();

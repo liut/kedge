@@ -208,10 +208,6 @@ getHomeDir()
 std::string const
 getConfDir(std::string const& app)
 {
-    // if (app.size() == 0)
-    // {
-    //  app = DEFAULT_APP_NAME;
-    // }
     // TODO: _WIN32
 #ifdef __APPLE__
     auto dir = fs::path(getHomeDir()) / "Library" / "Application Support" / app;
