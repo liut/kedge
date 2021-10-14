@@ -78,17 +78,17 @@ int main(int argc, char* argv[])
     // std::uint16_t peerPort = parse_port(listens);
     if (vm.count("listens"))
     {
-        LOG_DEBUG << "set listens " << listens << '|' << vm["listens"].as<std::string>() << '\n';
+        LOG_DEBUG << "set listens " << listens << '|' << vm["listens"].as<std::string>();
         params.settings.set_str(settings_pack::listen_interfaces, vm["listens"].as<std::string>());
     }
     if (vm.count("peer-id"))
     {
-        LOG_DEBUG << "set peerID " << peerID << '\n';
+        LOG_DEBUG << "set peerID " << peerID;
         params.settings.set_str(settings_pack::peer_fingerprint, peerID);
     }
     if (vm.count("store-root"))
     {
-        LOG_DEBUG << "set storeRoot " << storeRoot << '\n';
+        LOG_DEBUG << "set storeRoot " << storeRoot;
     }
     if (vm.count("dht-bootstrap-nodes"))
     {
