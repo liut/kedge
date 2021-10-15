@@ -77,14 +77,14 @@ handleTorrents(http::request<string_body> const& req) // get or post
 	if (req.method() == verb::post)
 	{
 		LOG_DEBUG << " post clen " << req.find(http::field::content_length)->value() << " bytes\n";
+		std::string dir(shth_->dir_store.string());
 		auto savePath = req.find("x-save-path");
-		if (savePath == req.end())
+		if (savePath != req.end())
 		{
-			return make_resp_400(req, "miss save-path");
+			dir = savePath->value();
 		}
 		const char* buf = req.body().data();
 		const int size = req.body().size();
-		const std::string dir(savePath->value());
 		LOG_DEBUG << "post metainfo " << size << " bytes with save-path: '" << dir << "'\n";
 		if (shth_->add_torrent(buf, size, dir))
 		{
