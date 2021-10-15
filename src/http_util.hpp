@@ -6,7 +6,7 @@
 
 #include <string_view>
 
-#include "config.h"
+#include "config.hpp"
 #include "net.hpp"
 
 namespace btd {

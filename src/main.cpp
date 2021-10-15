@@ -15,7 +15,7 @@ namespace po = boost::program_options;
 #include <libtorrent/version.hpp>
 
 
-#include "config.h"
+#include "config.hpp"
 #include "handlers.hpp"
 #include "listener.hpp"
 #include "sheath.hpp"

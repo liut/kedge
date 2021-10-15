@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-#include "config.h"
+#include "config.hpp"
 #include "net.hpp"
 #include "log.hpp"
 #include "util.hpp"
