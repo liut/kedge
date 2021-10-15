@@ -44,13 +44,13 @@ int main(int argc, char* argv[])
     std::string listens = "";
     std::string storeRoot = "";
 
-    po::options_description config("Configuration");
+    po::options_description config("configuration");
     config.add_options()
         ("help,h", "print usage message")
-        ("listens", po::value<std::string>(&listens)->default_value("0.0.0.0:6881"), "listen_interfaces")
-        ("store-root", po::value<std::string>(&storeRoot)->default_value(getStoreDir()), "store root, env: KEDGE_STORE_ROOT")
+        ("listens,l", po::value<std::string>(&listens)->default_value("0.0.0.0:6881"), "listen_interfaces")
+        ("store-root,d", po::value<std::string>(&storeRoot)->default_value(getStoreDir()), "store root, env: KEDGE_STORE_ROOT")
         ("peer-id", po::value<std::string>(&peerID)->default_value("-LT-"), "set prefix of fingerprint, env: LT_PEERID_PREFIX")
-        ("dht-bootstrap-nodes", po::value<std::string>(), "a comma-separated list of IP port-pairs. env: DHT_BOOTSTRAP_NODES")
+        ("dht-bootstrap-nodes", po::value<std::string>(), "a comma-separated list of Host port-pairs. env: DHT_BOOTSTRAP_NODES")
         ;
 
     po::variables_map vm;
@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
 
     if (vm.count("help")) {
         std::cout << PROJECT_NAME << " " << PROJECT_VER << "\n";
-        std::cout << config << "\n";
+        std::cout << " Flags and " << config << "\n";
         return 0;
     }
 
