@@ -29,9 +29,10 @@ std::string mapper(std::string env_var)
    // ensure the env_var is all caps
    std::transform(env_var.begin(), env_var.end(), env_var.begin(), ::toupper);
 
-   if (env_var == "LT_PEERID_PREFIX" || env_var == "TR_PEERID_PREFIX") return "peer-id";
-   if (env_var == "KEDGE_STORE_ROOT") return "store-root";
-   if (env_var == "DHT_BOOTSTRAP_NODES") return "dht-bootstrap-nodes";
+   if (env_var == ENV_PEERID_PREFIX || env_var == "TR_PEERID_PREFIX") return "peer-id";
+   if (env_var == ENV_BOOTSTRAP_NODES) return "dht-bootstrap-nodes";
+   if (env_var == ENV_STORE_ROOT) return "store-root";
+   if (env_var == ENV_WEBUI_ROOT) return "webui-root";
    return "";
 }
 
@@ -43,14 +44,16 @@ int main(int argc, char* argv[])
     std::string peerID = "";
     std::string listens = "";
     std::string storeRoot = "";
+    std::string webuiRoot = "";
 
     po::options_description config("configuration");
     config.add_options()
         ("help,h", "print usage message")
         ("listens,l", po::value<std::string>(&listens)->default_value("0.0.0.0:6881"), "listen_interfaces")
-        ("store-root,d", po::value<std::string>(&storeRoot)->default_value(getStoreDir()), "store root, env: KEDGE_STORE_ROOT")
-        ("peer-id", po::value<std::string>(&peerID)->default_value("-LT-"), "set prefix of fingerprint, env: LT_PEERID_PREFIX")
-        ("dht-bootstrap-nodes", po::value<std::string>(), "a comma-separated list of Host port-pairs. env: DHT_BOOTSTRAP_NODES")
+        ("store-root,d", po::value<std::string>(&storeRoot)->default_value(getStoreDir()), "store root, env: " ENV_STORE_ROOT)
+        ("webui-root", po::value<std::string>(&webuiRoot)->default_value(getWebUI()), "web UI root, env: " ENV_WEBUI_ROOT)
+        ("peer-id", po::value<std::string>(&peerID)->default_value("-LT-"), "set prefix of fingerprint, env: " ENV_PEERID_PREFIX)
+        ("dht-bootstrap-nodes", po::value<std::string>(), "a comma-separated list of Host port-pairs. env: " ENV_BOOTSTRAP_NODES)
         ;
 
     po::variables_map vm;
@@ -102,7 +105,7 @@ int main(int argc, char* argv[])
         ctx->start();
     });
 
-    const auto caller = std::make_shared<httpCaller>(ctx, getWebUI());
+    const auto caller = std::make_shared<httpCaller>(ctx, webuiRoot);
 
     // main: web server
 
