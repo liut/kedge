@@ -32,6 +32,7 @@ Plans
 ### add a torrent
 ```bash
 curl -v -X POST --data-binary @debian-10.10.0-amd64-netinst.iso.torrent -H 'x-save-path: /tmp' http://localhost:16180/api/torrents
+curl -v -X POST --data-raw 'magnet:?xt=urn:btih:5E13283D8DC83894FA899B4702F114DCAB6B736E' -H 'x-magnet-link: yes' http://localhost:16180/api/torrents
 ```
 
 ### show all torrents
