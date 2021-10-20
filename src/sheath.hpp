@@ -115,10 +115,10 @@ struct sheath : public std::enable_shared_from_this<sheath>
     void
     end();
 
-    void
-    add_magnet(lt::string_view uri);
     bool
-    add_torrent(std::string filename);
+    add_magnet(std::string const& uri);
+    bool
+    add_torrent(std::string const& filename);
     bool
     add_torrent(char const* buffer, int size, std::string const& save_path);
     json::value

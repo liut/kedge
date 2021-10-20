@@ -502,17 +502,17 @@ sheath::set_torrent_params(lt::add_torrent_params& p)
     p.storage_mode = allocation_mode;
 }
 
-void
-sheath::add_magnet(lt::string_view uri)
+bool
+sheath::add_magnet(std::string const& uri)
 {
     lt::error_code ec;
-    lt::add_torrent_params p = lt::parse_magnet_uri(uri.to_string(), ec);
+    lt::add_torrent_params p = lt::parse_magnet_uri(uri, ec);
 
     if (ec)
     {
         std::printf("invalid magnet link \"%s\": %s\n"
-            , uri.to_string().c_str(), ec.message().c_str());
-        return;
+            , uri.c_str(), ec.message().c_str());
+        return false;
     }
 
     std::vector<char> resume_data;
@@ -524,13 +524,14 @@ sheath::add_magnet(lt::string_view uri)
 
     set_torrent_params(p);
 
-    std::printf("adding magnet: %s\n", uri.to_string().c_str());
+    std::printf("adding magnet: %s\n", uri.c_str());
     ses_->async_add_torrent(std::move(p));
+    return true;
 }
 
 // return false on failure
 bool
-sheath::add_torrent(std::string filename)
+sheath::add_torrent(std::string const& filename)
 {
     using lt::add_torrent_params;
     using lt::storage_mode_t;
