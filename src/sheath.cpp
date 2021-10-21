@@ -502,18 +502,19 @@ sheath::set_torrent_params(lt::add_torrent_params& p)
     p.storage_mode = allocation_mode;
 }
 
-void
-sheath::add_magnet(lt::string_view uri)
+bool
+sheath::add_magnet(std::string const& uri)
 {
     lt::error_code ec;
-    lt::add_torrent_params p = lt::parse_magnet_uri(uri.to_string(), ec);
+    lt::add_torrent_params p = lt::parse_magnet_uri(uri, ec);
 
     if (ec)
     {
         std::printf("invalid magnet link \"%s\": %s\n"
-            , uri.to_string().c_str(), ec.message().c_str());
-        return;
+            , uri.c_str(), ec.message().c_str());
+        return false;
     }
+    LOG_DEBUG << "adding magnet: '" << uri << "'";
 
     std::vector<char> resume_data;
     if (load_file(resume_file(p.info_hash), resume_data))
@@ -524,17 +525,14 @@ sheath::add_magnet(lt::string_view uri)
 
     set_torrent_params(p);
 
-    std::printf("adding magnet: %s\n", uri.to_string().c_str());
     ses_->async_add_torrent(std::move(p));
+    return true;
 }
 
 // return false on failure
 bool
-sheath::add_torrent(std::string filename)
+sheath::add_torrent(std::string const& filename)
 {
-    using lt::add_torrent_params;
-    using lt::storage_mode_t;
-
     static int counter = 0;
 
     std::printf("[%d] %s\n", counter++, filename.c_str());
@@ -548,7 +546,7 @@ sheath::add_torrent(std::string filename)
         return false;
     }
 
-    add_torrent_params p;
+    lt::add_torrent_params p;
 
     std::vector<char> resume_data;
     if (load_file(resume_file(ti->info_hash()), resume_data))
@@ -568,9 +566,6 @@ sheath::add_torrent(std::string filename)
 bool
 sheath::add_torrent(char const* buffer, int size, std::string const& save_path)
 {
-    using lt::add_torrent_params;
-    using lt::storage_mode_t;
-
     lt::error_code ec;
     auto ti = std::make_shared<lt::torrent_info>(buffer, size, ec);
     if (ec)
@@ -585,7 +580,7 @@ sheath::add_torrent(char const* buffer, int size, std::string const& save_path)
         return false;
     }
 
-    add_torrent_params p;
+    lt::add_torrent_params p;
 
     std::vector<char> resume_data;
     if (load_file(resume_file(ti->info_hash()), resume_data))

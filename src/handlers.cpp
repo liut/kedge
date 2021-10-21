@@ -83,6 +83,16 @@ handleTorrents(http::request<string_body> const& req) // get or post
 		{
 			dir = savePath->value();
 		}
+		auto mlink = req.find("x-magnet-link"); // is magnet link = yes
+		if (mlink != req.end())
+		{
+			std::string uri(req.body().data(), req.body().size());
+			if (shth_->add_magnet(uri))
+			{
+				return make_resp_204(req);
+			}
+			return make_resp_500(req, "failed to add");
+		}
 		const char* buf = req.body().data();
 		const int size = req.body().size();
 		LOG_DEBUG << "post metainfo " << size << " bytes with save-path: '" << dir << "'\n";

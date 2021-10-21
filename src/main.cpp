@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
         ("store-root,d", po::value<std::string>(&storeRoot)->default_value(getStoreDir()), "store root, env: " ENV_STORE_ROOT)
         ("webui-root", po::value<std::string>(&webuiRoot)->default_value(getWebUI()), "web UI root, env: " ENV_WEBUI_ROOT)
         ("peer-id", po::value<std::string>(&peerID)->default_value("-LT-"), "set prefix of fingerprint, env: " ENV_PEERID_PREFIX)
-        ("dht-bootstrap-nodes", po::value<std::string>(), "a comma-separated list of Host port-pairs. env: " ENV_BOOTSTRAP_NODES)
+        ("dht-bootstrap-nodes", po::value<std::string>()->default_value("dht.transmissionbt.com:6881"), "a comma-separated list of Host port-pairs. env: " ENV_BOOTSTRAP_NODES)
         ;
 
     po::variables_map vm;
@@ -95,7 +95,9 @@ int main(int argc, char* argv[])
     }
     if (vm.count("dht-bootstrap-nodes"))
     {
-        params.settings.set_str(settings_pack::dht_bootstrap_nodes, vm["dht-bootstrap-nodes"].as<std::string>());
+        auto nodes = vm["dht-bootstrap-nodes"].as<std::string>();
+        LOG_DEBUG << "set dht-bootstrap-nodes " << nodes;
+        params.settings.set_str(settings_pack::dht_bootstrap_nodes, nodes);
     }
     const auto ses = std::make_shared<lt::session>(std::move(params));
 
