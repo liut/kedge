@@ -33,7 +33,7 @@ sbCall(http::request<string_body> const& req)
 {
 	if (req.target().find("/api/") == std::string_view::npos) return std::nullopt;
 	auto uri = req.target().substr(4);
-	if (req.method() == verb::get && uri == "/session/info"sv) return handleSessionInfo(req);
+	if (req.method() == verb::get && uri == "/session"sv) return handleSessionInfo(req);
 	if (req.method() == verb::get && uri == "/session/stats"sv) return handleSessionStats(req);
 	if (req.method() == verb::get && uri == "/sync/stats"sv) return handleSyncStats(req);
 	if (uri == "/torrents"sv) return handleTorrents(req);
