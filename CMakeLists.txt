@@ -40,8 +40,6 @@ set(REQUIRED_BOOST_LIBRARIES
     program_options
     # date_time
     json
-    # log_setup
-    # log
     # iostreams
     # timer
     thread
@@ -56,8 +54,6 @@ include_directories(${PROJECT_BINARY_BIN})
 
 # include
 include_directories( "include" "src" ${Boost_INCLUDE_DIRS}, "deps" "deps/plog/include")
-
-# find_package(BZip2 REQUIRED)
 
 find_package(ZLIB REQUIRED)
 message(STATUS "ZLIB libraries: " ${ZLIB_LIBRARIES})
@@ -74,12 +70,6 @@ set(sources
 list(TRANSFORM sources PREPEND "src/")
 
 add_executable(kedge ${sources})
-
-# target_include_directories(kedge PUBLIC ${Boost_INCLUDE_DIR})
-# include_directories(${Boost_INCLUDE_DIRS})
-# target_link_libraries(torrent-rasterbar PUBLIC ${Boost_SYSTEM_LIBRARY})
-# target_link_libraries(kedge PUBLIC ${Boost_LIBRARIES})
-# target_link_libraries(kedge ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 if(NOT build_shared)
 	set_property(TARGET torrent-rasterbar PROPERTY IMPORTED_LOCATION ${LT_ROOT}/lib/libtorrent-rasterbar.a)
@@ -121,7 +111,6 @@ endif()
 
 # target_compile_features(kedge PUBLIC cxx_std_17)
 
-add_definitions(-DBOOST_BEAST_USE_STD_STRING_VIEW -DLOG_LEVEL_DEBUG -DLOGGING_ENABLED)
-# add_compile_definitions(LOG_LEVEL_DEBUG)
-# add_compile_definitions(LOG_DEFAULT_LEVEL=0)
+add_definitions(-DBOOST_BEAST_USE_STD_STRING_VIEW)
+
 # add_definitions(-DTORRENT_DISABLE_ALERT_MSG)
