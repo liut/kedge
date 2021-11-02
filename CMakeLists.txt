@@ -55,7 +55,7 @@ configure_file(src/config.hpp.in ../src/config.hpp)
 include_directories(${PROJECT_BINARY_BIN})
 
 # include
-include_directories( "include" "src" ${Boost_INCLUDE_DIRS}, "deps")
+include_directories( "include" "src" ${Boost_INCLUDE_DIRS}, "deps" "deps/plog/include")
 
 # find_package(BZip2 REQUIRED)
 

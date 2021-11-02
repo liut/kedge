@@ -246,7 +246,7 @@ sheath::load_resumes()
         auto f_ = e.path();
         // only load resume files of the form <info-hash>.resume
         if (!is_resume_file(f_.filename().string())) {
-            fprintf(stderr, " invalid resume name: '%s'\n", f_.filename().c_str());
+            LOG_WARNING << "invalid resume name: " << f_.filename();
             continue;
         }
 
@@ -255,15 +255,14 @@ sheath::load_resumes()
         std::vector<char> resume_data;
         if (!load_file(fn_, resume_data))
         {
-            fprintf(stderr, "  failed to load resume file \"%s\"\n", fn_.c_str());
+            LOG_WARNING << "failed to load resume file: " << fn_;
             continue;
         }
         lt::error_code ec_;
         lt::add_torrent_params atp = lt::read_resume_data(resume_data, ec_);
         if (ec_)
         {
-            fprintf(stderr, "  failed to parse resume data \"%s\": %s\n"
-                , fn_.c_str(), ec_.message().c_str());
+            LOG_WARNING << "failed to parse resume data: " << fn_ << ", " << ec_.message();
             continue;
         }
         auto end = steady_clock::now();
@@ -271,7 +270,9 @@ sheath::load_resumes()
         std::string name("");
         if (!atp.name.empty()) name = atp.name;
         else if(atp.ti) name = atp.ti->name();
-        fprintf(stderr, "loaded resume %s(%s) a %s:%s done in %.2fs\n", f_.stem().c_str()
+        // LOG_INFO << "loaded resume: " << f_.stem() << '(' << atp.name() << ") a(" << pptime(atp.added_time) << ") "
+        //     << pptime(atp.completed_time) << " in " << elapsed.count() << " s";
+        PLOGI.printf("loaded %s(%s) a %s:%s done in %.2fs\n", f_.stem().c_str()
             , atp.name.c_str(), pptime(atp.added_time).c_str(), pptime(atp.completed_time).c_str(), elapsed.count());
 
         ses_->async_add_torrent(std::move(atp));
@@ -371,12 +372,14 @@ sheath::handle_alert(lt::alert* a)
         torrent_handle h = p->handle;
         h.save_resume_data(torrent_handle::save_info_dict);
         ++num_outstanding_resume_data;
-        std::fprintf(stderr, "finished %s(%s)\n", to_hex(h.info_hash()).c_str(), p->torrent_name());
+        LOG_INFO << "finished " << h.info_hash() << " " << p->torrent_name();
+        // std::fprintf(stderr, "finished %s(%s)\n", to_hex(h.info_hash()).c_str(), p->torrent_name());
     }
     else if (save_resume_data_alert* p = alert_cast<save_resume_data_alert>(a))
     {
-        std::fprintf(stderr, "saving resume %s(%s) a'%s' c'%s'\n", to_hex(p->params.info_hash).c_str(), p->params.name.c_str()
-            , pptime(p->params.added_time).c_str(), pptime(p->params.completed_time).c_str());
+        LOG_INFO << "saving resume " << p->params.info_hash << ' ' << p->params.name;
+        // std::fprintf(stderr, "saving resume %s(%s) a'%s' c'%s'\n", to_hex(p->params.info_hash).c_str(), p->params.name.c_str()
+        //     , pptime(p->params.added_time).c_str(), pptime(p->params.completed_time).c_str());
         --num_outstanding_resume_data;
         auto const buf = lt::write_resume_data_buf(p->params);
         save_file(resume_file(p->params.info_hash), buf);
@@ -420,7 +423,8 @@ print_alert(lt::alert const* a, std::string& str)
     str += "] ";
     str += a->message();
 
-    log("[%s] %s %s\n", timestamp(), a->what(),  a->message().c_str());
+    // log("[%s] %s %s\n", timestamp(), a->what(),  a->message().c_str());
+    PLOGD_(AlertLog) << a->what() << ' ' << a->message();
 }
 
 void
@@ -469,7 +473,7 @@ sheath::save_session()
     {
         ses_->pause();
     }
-    std::fprintf(stderr, "\nsaving session state\n");
+    LOG_INFO << "saving session state";
     {
         lt::entry session_state;
         lt::session::save_state_flags_t sft = lt::session::save_settings;
@@ -510,8 +514,7 @@ sheath::add_magnet(std::string const& uri)
 
     if (ec)
     {
-        std::printf("invalid magnet link \"%s\": %s\n"
-            , uri.c_str(), ec.message().c_str());
+        LOG_ERROR << "invalid magnet link: " << uri << ' ' << ec.message();
         return false;
     }
     LOG_DEBUG << "adding magnet: '" << uri << "'";
@@ -520,7 +523,7 @@ sheath::add_magnet(std::string const& uri)
     if (load_file(resume_file(p.info_hash), resume_data))
     {
         p = lt::read_resume_data(resume_data, ec);
-        if (ec) std::printf("  failed to load resume data: %s\n", ec.message().c_str());
+        PLOG_ERROR_IF(ec) << "failed to load resume data: " <<  ec.message();
     }
 
     set_torrent_params(p);
@@ -535,14 +538,13 @@ sheath::add_torrent(std::string const& filename)
 {
     static int counter = 0;
 
-    std::printf("[%d] %s\n", counter++, filename.c_str());
+    PLOGI.printf("[%d] %s\n", counter++, filename.c_str());
 
     lt::error_code ec;
     auto ti = std::make_shared<lt::torrent_info>(filename, ec);
     if (ec)
     {
-        std::printf("failed to load torrent \"%s\": %s\n"
-            , filename.c_str(), ec.message().c_str());
+        LOG_ERROR << "failed to load torrent " << filename << ": " << ec.message();
         return false;
     }
 
@@ -552,7 +554,7 @@ sheath::add_torrent(std::string const& filename)
     if (load_file(resume_file(ti->info_hash()), resume_data))
     {
         p = lt::read_resume_data(resume_data, ec);
-        if (ec) std::printf("  failed to load resume data: %s\n", ec.message().c_str());
+        PLOG_ERROR_IF(ec) << "failed to load resume data: " <<  ec.message();
     }
 
     set_torrent_params(p);
@@ -570,13 +572,13 @@ sheath::add_torrent(char const* buffer, int size, std::string const& save_path)
     auto ti = std::make_shared<lt::torrent_info>(buffer, size, ec);
     if (ec)
     {
-        std::fprintf(stderr, "failed to load torrent from buf(%d) : %s\n", size, ec.message().c_str());
+        LOG_ERROR << "failed to load torrent from buf " << size << ' ' << ec.message();
         return false;
     }
 
     std::error_code ec_;
     if(!fs::create_directory(fs::path(save_path), ec_) && ec_.value() != 0) {
-        std::fprintf(stderr, "failed to create directory(%s) : %s\n", save_path.c_str(), ec_.message().c_str());
+        LOG_ERROR << "failed to create directory: " << save_path << ' ' << ec_.message();
         return false;
     }
 
@@ -586,7 +588,7 @@ sheath::add_torrent(char const* buffer, int size, std::string const& save_path)
     if (load_file(resume_file(ti->info_hash()), resume_data))
     {
         p = lt::read_resume_data(resume_data, ec);
-        if (ec) std::fprintf(stderr, "  failed to load resume data: %s\n", ec.message().c_str());
+        PLOG_ERROR_IF(ec) << "  failed to load resume data: " << ec.message();
     }
 
     p.save_path = save_path;
@@ -676,7 +678,8 @@ sheath::save_all_resume()
             pop_alerts();
         }
     }
-    std::fprintf(stderr, "\nwaiting for resume data [%d]\n", num_outstanding_resume_data);
+
+    LOG_INFO << "waiting for resume data: " << num_outstanding_resume_data;
 
     while (num_outstanding_resume_data > 0)
     {
@@ -811,7 +814,9 @@ sheath::drop_torrent(lt::sha1_hash const& ih, bool const with_data)
     std::string const rpath = resume_file(ih);
     if (std::remove(rpath.c_str()) < 0)
         std::fprintf(stderr, "failed to delete resume file (\"%s\")\n", rpath.c_str());
-    std::fprintf(stderr, "deleted resume file (\"%s\")\n", rpath.c_str());
+
+    LOG_INFO << "deleted resume file: " << rpath;
+
     auto th = ses_->find_torrent(ih);
     if (th.is_valid())
     {
