@@ -14,13 +14,14 @@ namespace po = boost::program_options;
 #include <libtorrent/session.hpp>
 #include <libtorrent/version.hpp>
 
-
 #include "config.hpp"
 #include "handlers.hpp"
 #include "listener.hpp"
 #include "sheath.hpp"
 #include "util.hpp"
 #include "log.hpp"
+
+#include "plog/Initializers/RollingFileInitializer.h"
 
 using namespace btd;
 
@@ -38,6 +39,10 @@ std::string mapper(std::string env_var)
 
 int main(int argc, char* argv[])
 {
+    const std::string logMain(getLogsDir()+"/kedge-main.log");
+    const std::string logAlert(getLogsDir()+"/kedge-alert.log");
+    plog::init(plog::debug, logMain.c_str(), 1024*1024*32, 2); // Initialize the default logger instance.
+    plog::init<AlertLog>(plog::debug, logAlert.c_str(), 1024*1024*64, 2); // Initialize the 2nd logger instance.
 
     set_logging(true);
 
