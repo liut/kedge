@@ -146,6 +146,8 @@ private:
     set_all_torrents(const std::vector<lt::torrent_status> st);
     void
     update_json_stats();
+    void
+    move_storage(lt::torrent_handle const& h); // move to completed dir
 
     std::shared_ptr<lt::session> const ses_;
     fs::path const dir_conf;

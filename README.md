@@ -114,6 +114,12 @@ cd libtorrent
 test -e build && rm -rf build
 mkdir build && cd build
 cmake ..
-make -j6
+make -j4
+```
+
+### test & dev
+```bash
+touch .env
+env `cat .env 2>/dev/null | xargs` ./build/kedge
 ```
 
