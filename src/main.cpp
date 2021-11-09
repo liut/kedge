@@ -32,6 +32,7 @@ std::string mapper(std::string env_var)
 
    if (env_var == ENV_PEERID_PREFIX || env_var == "TR_PEERID_PREFIX") return "peer-id";
    if (env_var == ENV_BOOTSTRAP_NODES) return "dht-bootstrap-nodes";
+   if (env_var == ENV_MOVED_ROOT) return "moved-root";
    if (env_var == ENV_STORE_ROOT) return "store-root";
    if (env_var == ENV_WEBUI_ROOT) return "webui-root";
    return "";
@@ -48,6 +49,7 @@ int main(int argc, char* argv[])
 
     std::string peerID = "";
     std::string listens = "";
+    std::string movedRoot = "";
     std::string storeRoot = "";
     std::string webuiRoot = "";
 
@@ -55,6 +57,7 @@ int main(int argc, char* argv[])
     config.add_options()
         ("help,h", "print usage message")
         ("listens,l", po::value<std::string>(&listens)->default_value("0.0.0.0:6881"), "listen_interfaces")
+        ("moved-root", po::value<std::string>(&movedRoot)->default_value(getStoreDir()), "moved root, env: " ENV_MOVED_ROOT)
         ("store-root,d", po::value<std::string>(&storeRoot)->default_value(getStoreDir()), "store root, env: " ENV_STORE_ROOT)
         ("webui-root", po::value<std::string>(&webuiRoot)->default_value(getWebUI()), "web UI root, env: " ENV_WEBUI_ROOT)
         ("peer-id", po::value<std::string>(&peerID)->default_value("-LT-"), "set prefix of fingerprint, env: " ENV_PEERID_PREFIX)
@@ -94,9 +97,13 @@ int main(int argc, char* argv[])
         LOG_DEBUG << "set peerID " << peerID;
         params.settings.set_str(settings_pack::peer_fingerprint, peerID);
     }
+    if (vm.count("moved-root"))
+    {
+        LOG_DEBUG << "set moved root " << movedRoot;
+    }
     if (vm.count("store-root"))
     {
-        LOG_DEBUG << "set storeRoot " << storeRoot;
+        LOG_DEBUG << "set store root " << storeRoot;
     }
     if (vm.count("dht-bootstrap-nodes"))
     {
@@ -106,7 +113,7 @@ int main(int argc, char* argv[])
     }
     const auto ses = std::make_shared<lt::session>(std::move(params));
 
-    const auto ctx = std::make_shared<sheath>(ses, storeRoot);
+    const auto ctx = std::make_shared<sheath>(ses, storeRoot, movedRoot);
 
     std::thread ctx_start_loader([&ctx] {
         ctx->start();

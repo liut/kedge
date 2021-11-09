@@ -207,10 +207,11 @@ tag_invoke( json::value_from_tag, json::value& jv, lt::torrent_status const& st)
 }
 
 
-sheath::sheath(std::shared_ptr<lt::session> const ses, std::string store_dir)
+sheath::sheath(std::shared_ptr<lt::session> const ses, std::string store_dir, std::string moved_dir)
     : ses_(ses)
     , dir_conf(getConfDir())
     , dir_store(std::move(store_dir))
+    , dir_moved(std::move(moved_dir))
     , dir_resumes(dir_conf / RESUME_DIR)
     , dir_watches(dir_conf / WATCH_DIR)
     , file_ses_state(dir_conf / SESS_FILE)
