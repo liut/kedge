@@ -48,59 +48,6 @@ uptimeMs()
     return int_ms.count();
 }
 
-static struct logger {
-    FILE *log_file;
-    std::mutex log_mutex;
-
-    logger()
-        : log_file(nullptr)
-    {
-    }
-    ~logger()
-    {
-        if (log_file) fclose(log_file);
-    }
-} log_file_holder;
-
-void
-log(char const *fmt, ...)
-{
-    if (log_file_holder.log_file == nullptr) return;
-
-    std::lock_guard<std::mutex> lock(log_file_holder.log_mutex);
-    static lt::time_point start = lt::clock_type::now();
-    std::fprintf(log_file_holder.log_file, "[%010" PRId64 "] ",
-                 lt::total_microseconds(lt::clock_type::now() - start));
-    va_list l;
-    va_start(l, fmt);
-    vfprintf(log_file_holder.log_file, fmt, l);
-    va_end(l);
-}
-
-bool
-is_logging()
-{
-    return log_file_holder.log_file != nullptr;
-}
-
-void
-set_logging(bool enable)
-{
-    if (enable) {
-        if (log_file_holder.log_file == nullptr) {
-            auto fn                  = getLogsDir() + "/kedge.log";
-            log_file_holder.log_file = fopen(fn.c_str(), "w+");
-        }
-    }
-    else {
-        if (log_file_holder.log_file != nullptr) {
-            FILE *f                  = log_file_holder.log_file;
-            log_file_holder.log_file = nullptr;
-            fclose(f);
-        }
-    }
-}
-
 char const *
 timestamp()
 {

@@ -45,8 +45,6 @@ int main(int argc, char* argv[])
     plog::init(plog::debug, logMain.c_str(), 1024*1024*32, 2); // Initialize the default logger instance.
     plog::init<AlertLog>(plog::debug, logAlert.c_str(), 1024*1024*64, 2); // Initialize the 2nd logger instance.
 
-    set_logging(true);
-
     std::string peerID = "";
     std::string listens = "";
     std::string movedRoot = "";
@@ -194,8 +192,7 @@ int main(int argc, char* argv[])
     caller_loader.join();
     std::cerr << "http server stopped" << std::endl;
 
-    set_logging(false);
-    std::cerr << "closing session" << std::endl;
+    std::cerr << "closing" << std::endl;
 
     return 0;
 }

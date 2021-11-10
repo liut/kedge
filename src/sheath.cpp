@@ -344,9 +344,8 @@ sheath::handle_alert(lt::alert* a)
     {
         if (p->error)
         {
-            std::fprintf(stderr, "failed to add torrent: %s %s\n"
-                , p->params.ti ? p->params.ti->name().c_str() : p->params.name.c_str()
-                , p->error.message().c_str());
+            LOG_WARNING << "failed to add torrent: " << p->params.name << " ih "
+                        << p->params.info_hash << ", " << p->error.message();
         }
         else
         {
@@ -374,14 +373,14 @@ sheath::handle_alert(lt::alert* a)
         h.save_resume_data(torrent_handle::save_info_dict);
         ++num_outstanding_resume_data;
         LOG_INFO << "finished " << h.info_hash() << " " << p->torrent_name();
-        // std::fprintf(stderr, "finished %s(%s)\n", to_hex(h.info_hash()).c_str(), p->torrent_name());
         move_storage(h);
     }
     else if (save_resume_data_alert* p = alert_cast<save_resume_data_alert>(a))
     {
-        LOG_INFO << "saving resume " << p->params.info_hash << ' ' << p->params.name;
-        // std::fprintf(stderr, "saving resume %s(%s) a'%s' c'%s'\n", to_hex(p->params.info_hash).c_str(), p->params.name.c_str()
-        //     , pptime(p->params.added_time).c_str(), pptime(p->params.completed_time).c_str());
+        LOG_INFO << "saving resume " << p->params.info_hash << " "
+                 << p->params.name << " a:" << pptime(p->params.added_time)
+                 << " c:" << pptime(p->params.completed_time);
+
         --num_outstanding_resume_data;
         auto const buf = lt::write_resume_data_buf(p->params);
         save_file(resume_file(p->params.info_hash), buf);
@@ -425,7 +424,6 @@ print_alert(lt::alert const* a, std::string& str)
     str += "] ";
     str += a->message();
 
-    // log("[%s] %s %s\n", timestamp(), a->what(),  a->message().c_str());
     PLOGD_(AlertLog) << a->what() << ' ' << a->message();
 }
 
@@ -815,9 +813,9 @@ sheath::drop_torrent(lt::sha1_hash const& ih, bool const with_data)
     // also delete the resume file
     std::string const rpath = resume_file(ih);
     if (std::remove(rpath.c_str()) < 0)
-        std::fprintf(stderr, "failed to delete resume file (\"%s\")\n", rpath.c_str());
-
-    LOG_INFO << "deleted resume file: " << rpath;
+        LOG_WARNING << "failed to delete resume file: " << rpath;
+    else
+        LOG_INFO << "deleted resume file: " << rpath;
 
     auto th = ses_->find_torrent(ih);
     if (th.is_valid())
