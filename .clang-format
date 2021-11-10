@@ -1,6 +1,12 @@
 ---
-BasedOnStyle: LLVM
+#BasedOnStyle: LLVM
+UseTab: Never
 IndentWidth: 4
 ---
 Language: Cpp
-DisableFormat: true
+Standard: Latest
+AlignConsecutiveAssignments: AcrossComments
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: WithoutElse
+BreakConstructorInitializers: BeforeComma
+CompactNamespaces: true

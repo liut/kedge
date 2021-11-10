@@ -34,7 +34,7 @@ struct sessionStats
     time_t uptime;
     uint64_t uptimeMs;
 
-public:
+  public:
     json::object
     to_json_object() const
     {
