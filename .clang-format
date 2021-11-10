@@ -6,8 +6,10 @@ IndentWidth: 4
 Language: Cpp
 Standard: Latest
 AlignConsecutiveAssignments: AcrossComments
+AllowShortBlocksOnASingleLine: Empty
+AllowShortCaseLabelsOnASingleLine: True
 AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: WithoutElse
 BreakConstructorInitializers: BeforeComma
-CompactNamespaces: true
+CompactNamespaces: True
 IncludeBlocks: Preserve
