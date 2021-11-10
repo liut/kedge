@@ -13,9 +13,9 @@
 #include <boost/json/value.hpp>
 namespace json = boost::json;
 
-#include "sheath.hpp"
-#include "net.hpp"
 #include "http_util.hpp"
+#include "net.hpp"
+#include "sheath.hpp"
 #include "util.hpp"
 
 namespace btd {

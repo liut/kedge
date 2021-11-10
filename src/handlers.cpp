@@ -8,14 +8,14 @@
 
 #include <boost/json/value.hpp>
 namespace json = boost::json;
-#include <boost/json/serialize.hpp>
 #include "json_diff.hpp"
+#include <boost/json/serialize.hpp>
 
 #include <libtorrent/config.hpp>
 
-#include "log.hpp"
 #include "handlers.hpp"
 #include "http_websocket.hpp"
+#include "log.hpp"
 
 namespace btd {
 

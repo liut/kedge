@@ -17,9 +17,9 @@ namespace po = boost::program_options;
 #include "const.hpp"
 #include "handlers.hpp"
 #include "listener.hpp"
+#include "log.hpp"
 #include "sheath.hpp"
 #include "util.hpp"
-#include "log.hpp"
 
 #include "plog/Initializers/RollingFileInitializer.h"
 

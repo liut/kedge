@@ -2,13 +2,13 @@
 
 #include <cstdint>
 #include <ctime>
+#include <filesystem>
 #include <iostream>
 #include <random>
 #include <string>
 #include <string_view>
-#include <vector>
 #include <system_error>
-#include <filesystem>
+#include <vector>
 
 #include <libtorrent/sha1_hash.hpp>
 #include <libtorrent/string_view.hpp>
@@ -86,15 +86,15 @@ template<typename T>
 std::string
 n2hex(T i)
 {
-  std::stringstream stream;
-  stream << std::setfill ('0') << std::setw(sizeof(T)*2)
-         << std::hex << i;
-  return stream.str();
+    std::stringstream stream;
+    stream << std::setfill ('0') << std::setw(sizeof(T) * 2)
+           << std::hex << i;
+    return stream.str();
 }
 
 template <typename Enumeration>
 auto asValue(Enumeration const value)
-    -> typename std::underlying_type<Enumeration>::type
+-> typename std::underlying_type<Enumeration>::type
 {
     return static_cast<typename std::underlying_type<Enumeration>::type>(value);
 }

@@ -1,15 +1,15 @@
 
+#include <chrono>    // time and clock
 #include <cinttypes> // for PRId64 et.al.
-#include <cstdarg> // va_start, va_end
-#include <cstdio> // FILE
-#include <chrono> // time and clock
-#include <mutex>
-#include <iomanip>
+#include <cstdarg>   // va_start, va_end
+#include <cstdio>    // FILE
 #include <fstream>
+#include <iomanip>
+#include <mutex>
 #include <sstream>
+#include <string.h> // strdup
 #include <thread>
 #include <utility>
-#include <string.h> // strdup
 
 #ifndef _WIN32
 #include <pwd.h>

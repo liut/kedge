@@ -1,10 +1,9 @@
 #pragma once
 
-
 #include <ctime>
+#include <deque>
 #include <filesystem>
 #include <iostream>
-#include <deque>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -15,9 +14,9 @@
 
 namespace json = boost::json;
 
+#include <libtorrent/alert_types.hpp>
 #include <libtorrent/config.hpp>
 #include <libtorrent/fwd.hpp>
-#include <libtorrent/alert_types.hpp>
 #include <libtorrent/session.hpp>
 #include <libtorrent/session_stats.hpp>
 #include <libtorrent/sha1_hash.hpp>

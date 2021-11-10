@@ -10,3 +10,4 @@ AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: WithoutElse
 BreakConstructorInitializers: BeforeComma
 CompactNamespaces: true
+IncludeBlocks: Preserve

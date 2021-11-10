@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/beast/core/error.hpp>
 #include <boost/beast/http/error.hpp>

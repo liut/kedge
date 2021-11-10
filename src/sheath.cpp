@@ -3,16 +3,16 @@
 #include <ctime>
 #include <filesystem>
 
-#include <libtorrent/bencode.hpp>
 #include <libtorrent/add_torrent_params.hpp>
+#include <libtorrent/bencode.hpp>
 #include <libtorrent/magnet_uri.hpp>
 #include <libtorrent/read_resume_data.hpp>
-#include <libtorrent/write_resume_data.hpp>
 #include <libtorrent/session_handle.hpp>
 #include <libtorrent/session_types.hpp>
 #include <libtorrent/torrent_handle.hpp>
 #include <libtorrent/torrent_info.hpp>
 #include <libtorrent/torrent_status.hpp>
+#include <libtorrent/write_resume_data.hpp>
 
 #include "sheath.hpp"
 #include "util.hpp"
