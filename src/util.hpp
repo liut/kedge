@@ -21,7 +21,7 @@ static std::atomic_bool quit(false);
 
 namespace fs = std::filesystem;
 
-void log(char const* fmt, ...);
+void log(char const *fmt, ...);
 bool is_logging();
 void set_logging(bool enable);
 

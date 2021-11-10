@@ -1,15 +1,29 @@
 ---
-#BasedOnStyle: LLVM
+BasedOnStyle: LLVM
 UseTab: Never
 IndentWidth: 4
 ---
 Language: Cpp
 Standard: Latest
+
 AlignConsecutiveAssignments: AcrossComments
 AllowShortBlocksOnASingleLine: Empty
 AllowShortCaseLabelsOnASingleLine: True
 AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortLambdasOnASingleLine: Empty
+AllowShortLoopsOnASingleLine: True
+AlwaysBreakAfterDefinitionReturnType: All
+BreakBeforeBraces: Stroustrup
 BreakConstructorInitializers: BeforeComma
+BreakInheritanceList: AfterComma
+BraceWrapping:
+  SplitEmptyFunction: False
+  SplitEmptyRecord: False
+
 CompactNamespaces: True
+EmptyLineBeforeAccessModifier: Always
+FixNamespaceComments: True
 IncludeBlocks: Preserve
+
+PenaltyReturnTypeOnItsOwnLine: 36

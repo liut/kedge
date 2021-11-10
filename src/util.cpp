@@ -25,7 +25,7 @@
 
 namespace btd {
 using namespace std::chrono;
-static std::time_t start_up = std::time(0);
+static std::time_t start_up  = std::time(0);
 static time_point start_up_c = system_clock::now();
 
 std::time_t
@@ -43,85 +43,88 @@ uptime()
 std::int64_t
 uptimeMs()
 {
-    auto cur_c = system_clock::now();
+    auto cur_c  = system_clock::now();
     auto int_ms = duration_cast<milliseconds>(cur_c - start_up_c);
     return int_ms.count();
 }
 
-static struct logger
-{
-    FILE* log_file;
+static struct logger {
+    FILE *log_file;
     std::mutex log_mutex;
 
-    logger() : log_file(nullptr) {}
+    logger()
+        : log_file(nullptr)
+    {
+    }
     ~logger()
     {
         if (log_file) fclose(log_file);
     }
 } log_file_holder;
 
-void log(char const* fmt, ...)
+void
+log(char const *fmt, ...)
 {
     if (log_file_holder.log_file == nullptr) return;
 
     std::lock_guard<std::mutex> lock(log_file_holder.log_mutex);
     static lt::time_point start = lt::clock_type::now();
-    std::fprintf(log_file_holder.log_file, "[%010" PRId64 "] ", lt::total_microseconds(lt::clock_type::now() - start));
+    std::fprintf(log_file_holder.log_file, "[%010" PRId64 "] ",
+                 lt::total_microseconds(lt::clock_type::now() - start));
     va_list l;
     va_start(l, fmt);
     vfprintf(log_file_holder.log_file, fmt, l);
     va_end(l);
 }
 
-bool is_logging() {
+bool
+is_logging()
+{
     return log_file_holder.log_file != nullptr;
 }
 
-void set_logging(bool enable) {
-    if (enable)
-    {
-        if (log_file_holder.log_file == nullptr)
-        {
-            auto fn = getLogsDir()+"/kedge.log";
+void
+set_logging(bool enable)
+{
+    if (enable) {
+        if (log_file_holder.log_file == nullptr) {
+            auto fn                  = getLogsDir() + "/kedge.log";
             log_file_holder.log_file = fopen(fn.c_str(), "w+");
         }
     }
-    else
-    {
-        if (log_file_holder.log_file != nullptr)
-        {
-            FILE* f = log_file_holder.log_file;
+    else {
+        if (log_file_holder.log_file != nullptr) {
+            FILE *f                  = log_file_holder.log_file;
             log_file_holder.log_file = nullptr;
             fclose(f);
         }
     }
 }
 
-
-char const* timestamp()
+char const *
+timestamp()
 {
-    time_t t = std::time(nullptr);
-    tm* timeinfo = std::localtime(&t);
+    time_t t     = std::time(nullptr);
+    tm *timeinfo = std::localtime(&t);
     static char str[200];
     std::strftime(str, 200, "%m%d %X", timeinfo);
     return str;
 }
 
-
-bool is_resume_file(std::string const& s)
+bool
+is_resume_file(std::string const &s)
 {
     static std::string const hex_digit = "0123456789abcdef";
     if (s.size() != 40 + 7) return false;
     if (s.substr(40) != ".resume") return false;
-    for (char const c : s.substr(0, 40))
-    {
+    for (char const c : s.substr(0, 40)) {
         if (hex_digit.find(c) == std::string::npos) return false;
     }
     return true;
 }
 
-
-bool load_file(std::string const& filename, std::vector<char>& v, int limit)
+bool
+load_file(std::string const &filename, std::vector<char> &v, int limit)
 {
     std::fstream f(filename, std::ios_base::in | std::ios_base::binary);
     f.seekg(0, std::ios_base::end);
@@ -134,38 +137,34 @@ bool load_file(std::string const& filename, std::vector<char>& v, int limit)
     return !f.fail();
 }
 
-int save_file(std::string const& filename, std::vector<char> const& v)
+int
+save_file(std::string const &filename, std::vector<char> const &v)
 {
-    std::fstream f(filename, std::ios_base::trunc | std::ios_base::out | std::ios_base::binary);
+    std::fstream f(filename, std::ios_base::trunc | std::ios_base::out |
+                                 std::ios_base::binary);
     f.write(v.data(), v.size());
     return !f.fail();
 }
 
-
 std::string const
-path_cat(std::string_view const& base, std::string_view const& path)
+path_cat(std::string_view const &base, std::string_view const &path)
 {
-    auto result = fs::path(base)+=path;
+    auto result = fs::path(base) += path;
     return result.string();
 }
 
 bool
-from_hex(lt::sha1_hash & ih, std::string const &s)
+from_hex(lt::sha1_hash &ih, std::string const &s)
 {
-    if (s.size() != 40)
-    {
-        return false;
-    }
+    if (s.size() != 40) { return false; }
     std::stringstream hash(s.c_str());
     hash >> ih;
-    if (hash.fail()) {
-        return false;
-    }
+    if (hash.fail()) { return false; }
     return true;
 }
 
 std::string
-to_hex(lt::sha1_hash const& ih)
+to_hex(lt::sha1_hash const &ih)
 {
     std::stringstream ret;
     ret << ih;
@@ -173,47 +172,38 @@ to_hex(lt::sha1_hash const& ih)
 }
 
 std::string const
-getEnvStr( std::string const & key, std::string const & dft )
+getEnvStr(std::string const &key, std::string const &dft)
 {
-    char * val = std::getenv( key.c_str() );
+    char *val = std::getenv(key.c_str());
     return val == nullptr ? dft : std::string(val);
 }
 
 static std::string
 getHomeDir()
 {
-    static char * home = nullptr;
-    if (home == nullptr)
-    {
+    static char *home = nullptr;
+    if (home == nullptr) {
         home = std::getenv("HOME");
-        if (home == nullptr)
-        {
-            struct passwd* pw = getpwuid(getuid());
-            if (pw != NULL)
-            {
-                home = strdup(pw->pw_dir);
-            }
+        if (home == nullptr) {
+            struct passwd *pw = getpwuid(getuid());
+            if (pw != NULL) { home = strdup(pw->pw_dir); }
             endpwent();
         }
-        if (home == nullptr)
-        {
-            home = strdup("");
-        }
+        if (home == nullptr) { home = strdup(""); }
     }
 
     return home;
 }
 
-
 std::string const
-getConfDir(std::string const& app)
+getConfDir(std::string const &app)
 {
     // TODO: _WIN32
 #ifdef __APPLE__
     auto dir = fs::path(getHomeDir()) / "Library" / "Application Support" / app;
 #else
     auto xcfg = fs::path(getHomeDir()) / ".config";
-    auto dir = fs::path(getEnvStr("XDG_CONFIG_HOME", xcfg.string())) / app;
+    auto dir  = fs::path(getEnvStr("XDG_CONFIG_HOME", xcfg.string())) / app;
 #endif
     return dir.string();
 }
@@ -240,15 +230,11 @@ getWebUI()
 }
 
 std::int16_t
-parse_port(std::string const& addr) noexcept
+parse_port(std::string const &addr) noexcept
 {
-    if (addr.empty())
-    {
-        return 0;
-    }
-    char* port = (char*) strrchr((char*)addr.c_str(), ':');
-    if (port != nullptr)
-    {
+    if (addr.empty()) { return 0; }
+    char *port = (char *)strrchr((char *)addr.c_str(), ':');
+    if (port != nullptr) {
         port++;
         return std::uint16_t(atoi(port));
     }
@@ -267,7 +253,7 @@ parse_port(std::string const& addr) noexcept
 }
 
 std::string
-pptime(std::time_t const & t)
+pptime(std::time_t const &t)
 {
     if (!t) return "0";
     char str[15]; // 20161023 16:39
@@ -286,6 +272,4 @@ randNum(std::uint32_t min, std::uint32_t max)
     return distrib(rng);
 }
 
-
-
-} // namespace
+} // namespace btd
