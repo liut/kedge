@@ -40,6 +40,8 @@ const std::string WATCH_DIR = "watching"s;
 const std::string CERT_DIR = "certificates"s;
 const int WATCH_INTERVAL = 2; // seconds
 const int S_WAIT_SAVE = 6; // seconds
+const int PERCENT_ONE = 10000;
+const int PERCENT_DONE = 100*PERCENT_ONE;
 
 bool
 prepare_dirs(std::string const & cd);
@@ -146,7 +148,7 @@ private:
     void
     update_json_stats();
     void
-    move_storage(lt::torrent_handle const& h); // move to completed dir
+    on_torrent_finished(lt::torrent_handle const& h);
 
     std::shared_ptr<lt::session> const ses_;
     fs::path const dir_conf;

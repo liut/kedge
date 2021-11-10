@@ -373,7 +373,7 @@ sheath::handle_alert(lt::alert* a)
         h.save_resume_data(torrent_handle::save_info_dict);
         ++num_outstanding_resume_data;
         LOG_INFO << "finished " << h.info_hash() << " " << p->torrent_name();
-        move_storage(h);
+        on_torrent_finished(h);
     }
     else if (save_resume_data_alert* p = alert_cast<save_resume_data_alert>(a))
     {
@@ -832,19 +832,24 @@ sheath::drop_torrent(lt::sha1_hash const& ih, bool const with_data)
 }
 
 void
-sheath::move_storage(lt::torrent_handle const& th)
+sheath::on_torrent_finished(lt::torrent_handle const& th)
 {
     if (dir_moved.empty()) return;
-    auto st = th.status(lt::torrent_handle::query_save_path);
+    const auto st = th.status(lt::torrent_handle::query_save_path);
+    const auto td = st.total_payload_download;
+    LOG_DEBUG << "finish " << st.info_hash << " ppm " << st.progress_ppm
+              << " " << st.is_finished << " download " << td << " bytes";
+    if (st.progress_ppm < PERCENT_DONE || 0 == td) {
+        LOG_DEBUG << " unfinished or not downloaded, do not move";
+        return;
+    }
     LOG_DEBUG << " save_path: " << st.save_path << " moved: " << dir_moved;
-    if (st.save_path == dir_moved)
-    {
+    if (st.save_path == dir_moved) {
         LOG_INFO << "already moved or exist";
         return;
     }
     std::error_code ec;
-    if (fs::exists(dir_moved, ec))
-    {
+    if (fs::exists(dir_moved, ec)) {
         th.move_storage(dir_moved.string(), lt::move_flags_t::dont_replace);
     }
     PLOG_WARNING_IF(ec) << "move failed " << ec.message();
