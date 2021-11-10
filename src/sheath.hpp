@@ -8,7 +8,6 @@
 #include <memory>
 #include <mutex>
 #include <string>
-// #include <unordered_set>
 #include <vector>
 
 #include <boost/config.hpp>
@@ -71,7 +70,8 @@ struct sheath : public std::enable_shared_from_this<sheath>
     static constexpr query_flags_t query_files = 4;
 
     explicit
-    sheath(std::shared_ptr<lt::session> const ses, std::string store_dir);
+    sheath(std::shared_ptr<lt::session> const ses,
+        std::string store_dir, std::string moved_dir);
 
     ~sheath()
     {
@@ -146,9 +146,12 @@ private:
     set_all_torrents(const std::vector<lt::torrent_status> st);
     void
     update_json_stats();
+    void
+    move_storage(lt::torrent_handle const& h); // move to completed dir
 
     std::shared_ptr<lt::session> const ses_;
     fs::path const dir_conf;
+    fs::path const dir_moved;
     fs::path const dir_store;
     fs::path const dir_resumes;
     fs::path const dir_watches;
