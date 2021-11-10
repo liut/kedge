@@ -111,6 +111,6 @@ endif()
 
 # target_compile_features(kedge PUBLIC cxx_std_17)
 
-add_definitions(-DBOOST_BEAST_USE_STD_STRING_VIEW)
+add_definitions(-DBOOST_BEAST_USE_STD_STRING_VIEW -DBOOST_ASIO_HAS_STD_INVOKE_RESULT)
 
 # add_definitions(-DTORRENT_DISABLE_ALERT_MSG)
