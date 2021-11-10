@@ -13,7 +13,7 @@
 #include <libtorrent/sha1_hash.hpp>
 #include <libtorrent/string_view.hpp>
 
-#include "config.hpp"
+#include "const.hpp"
 
 namespace btd {
 

@@ -17,7 +17,7 @@
 #include "sheath.hpp"
 #include "util.hpp"
 // #include "http_ws_session.hpp"
-#include "config.hpp"
+#include "const.hpp"
 #include "log.hpp"
 
 namespace btd {
