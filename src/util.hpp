@@ -17,9 +17,21 @@
 
 namespace btd {
 
+using namespace std::literals;
+
 static std::atomic_bool quit(false);
 
 namespace fs = std::filesystem;
+
+const std::string SESS_FILE  = ".ses_state"s;
+const std::string RESUME_DIR = ".resume"s;
+const std::string RESUME_EXT = ".resume"s;
+const std::string WATCH_DIR  = "watching"s;
+const std::string CERT_DIR   = "certificates"s;
+const int WATCH_INTERVAL     = 2; // seconds
+const int S_WAIT_SAVE        = 6; // seconds
+const int PERCENT_ONE        = 10000;
+const int PERCENT_DONE       = 100 * PERCENT_ONE;
 
 char const*
 timestamp();
@@ -50,6 +62,9 @@ uptime();
 
 std::int64_t
 uptimeMs();
+
+bool
+prepare_dirs(std::string const & cd);
 
 std::string const
 getEnvStr(std::string const & key, std::string const & dft = "");

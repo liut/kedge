@@ -51,27 +51,6 @@ parse_endpoint(lt::tcp::endpoint & ep, std::string addr)
     return false;
 }
 
-bool
-prepare_dirs(std::string const & cd)
-{
-    fs::path cd_(cd);
-    std::vector<fs::path> paths = {cd_
-        , cd_ / RESUME_DIR
-        , cd_ / WATCH_DIR
-        , cd_ / CERT_DIR
-    };
-    for(fs::path &p : paths)
-    {
-        std::error_code ec;
-        if (!fs::create_directory(p, ec) && ec.value() != 0)
-        {
-            LOG_ERROR << "failed to create directory " << p << " reason" << ec.message();
-            return false;
-        }
-    }
-    return true;
-}
-
 void
 load_sess_params(std::string const& cd, lt::session_params& params)
 {

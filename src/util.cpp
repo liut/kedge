@@ -21,6 +21,7 @@
 #include <libtorrent/string_view.hpp>
 #include <libtorrent/time.hpp>
 
+#include "log.hpp"
 #include "util.hpp"
 
 namespace btd {
@@ -116,6 +117,27 @@ to_hex(lt::sha1_hash const &ih)
     std::stringstream ret;
     ret << ih;
     return ret.str();
+}
+
+bool
+prepare_dirs(std::string const & cd)
+{
+    fs::path cd_(cd);
+    std::vector<fs::path> paths = {cd_
+        , cd_ / RESUME_DIR
+        , cd_ / WATCH_DIR
+        , cd_ / CERT_DIR
+    };
+    for(fs::path &p : paths)
+    {
+        std::error_code ec;
+        if (!fs::create_directory(p, ec) && ec.value() != 0)
+        {
+            LOG_ERROR << "failed to create directory " << p << " reason " << ec.message();
+            return false;
+        }
+    }
+    return true;
 }
 
 std::string const

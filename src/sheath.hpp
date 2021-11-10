@@ -30,28 +30,10 @@ namespace json = boost::json;
 // class httpCaller;
 
 namespace btd {
-using namespace std::literals;
 namespace fs = std::filesystem;
-
-const std::string SESS_FILE = ".ses_state"s;
-const std::string RESUME_DIR = ".resume"s;
-const std::string RESUME_EXT = ".resume"s;
-const std::string WATCH_DIR = "watching"s;
-const std::string CERT_DIR = "certificates"s;
-const int WATCH_INTERVAL = 2; // seconds
-const int S_WAIT_SAVE = 6; // seconds
-const int PERCENT_ONE = 10000;
-const int PERCENT_DONE = 100*PERCENT_ONE;
-
-bool
-prepare_dirs(std::string const & cd);
 
 void
 load_sess_params(std::string const& cd, lt::session_params& params);
-
-std::string
-resume_file(std::string const& cd, lt::sha1_hash const& info_hash);
-
 
 json::object
 torrent_status_to_json_obj(lt::torrent_status const& st);
