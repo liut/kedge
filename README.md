@@ -22,10 +22,10 @@ If you want to experience these APIs please check the official web UI [kedge-sve
 
 Plans
 ---
-* Support for Add a new task by magnet link.
-* Support optional actions such as moving folder when task is completed.
+* <del>Support for Add a new task by magnet link</del>.
+* <del>Support optional actions such as moving folder when task is completed</del>.
 * <del>Split logs with alert types?</del>.
-
+* Pause and resume torrents.
 
 ## API Test
 
