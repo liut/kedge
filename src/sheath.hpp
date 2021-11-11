@@ -32,9 +32,6 @@ namespace json = boost::json;
 namespace btd {
 namespace fs = std::filesystem;
 
-void
-load_sess_params(std::string const& cd, lt::session_params& params);
-
 json::object
 torrent_status_to_json_obj(lt::torrent_status const& st);
 

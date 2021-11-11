@@ -51,59 +51,6 @@ parse_endpoint(lt::tcp::endpoint & ep, std::string addr)
     return false;
 }
 
-void
-load_sess_params(std::string const& cd, lt::session_params& params)
-{
-    using lt::settings_pack;
-
-    std::vector<char> in;
-    if (load_file(path_cat(cd, SESS_FILE), in))
-    {
-        lt::error_code ec;
-        lt::bdecode_node e = lt::bdecode(in, ec);
-        lt::session::save_state_flags_t sft = lt::session::save_settings;
-#ifndef TORRENT_DISABLE_DHT
-        params.dht_settings.privacy_lookups = true;
-        sft |= lt::session::save_dht_state;
-#endif
-
-        if (!ec) params = read_session_params(e, sft);
-    }
-
-    auto& settings = params.settings;
-    settings.set_int(settings_pack::cache_size, -1);
-    settings.set_int(settings_pack::choking_algorithm, settings_pack::rate_based_choker);
-
-    // if (!settings.has_val(settings_pack::user_agent) || settings.get_str(settings_pack::user_agent) == "" )
-    // {
-        settings.set_str(settings_pack::user_agent, PROJECT_NAME "/" PROJECT_VER " lt/" LIBTORRENT_VERSION);
-    // }
-
-    settings.set_int(settings_pack::alert_mask
-        , lt::alert_category::error
-        | lt::alert_category::peer
-        | lt::alert_category::port_mapping
-        | lt::alert_category::storage
-        | lt::alert_category::tracker
-        | lt::alert_category::connect
-        | lt::alert_category::status
-        | lt::alert_category::ip_block
-        | lt::alert_category::performance_warning
-        | lt::alert_category::dht
-        // | lt::alert_category::session_log
-        // | lt::alert_category::torrent_log
-        | lt::alert_category::incoming_request
-        | lt::alert_category::dht_operation
-        | lt::alert_category::port_mapping_log
-        | lt::alert_category::file_progress);
-
-    settings.set_bool(settings_pack::enable_upnp, false);
-    settings.set_bool(settings_pack::enable_natpmp, false);
-    settings.set_bool(settings_pack::enable_dht, false);
-    settings.set_bool(settings_pack::enable_lsd, false);
-    settings.set_bool(settings_pack::validate_https_trackers, false);
-}
-
 
 json::object
 torrent_status_to_json_obj(lt::torrent_status const& st)

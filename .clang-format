@@ -25,5 +25,8 @@ CompactNamespaces: True
 EmptyLineBeforeAccessModifier: Always
 FixNamespaceComments: True
 IncludeBlocks: Preserve
+IndentAccessModifiers: False
 
 PenaltyReturnTypeOnItsOwnLine: 36
+
+PointerAlignment: Left
