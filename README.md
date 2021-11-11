@@ -74,7 +74,7 @@ curl http://localhost:16180/api/stats | jq
 ```
 
 ## Dependencies
-* [boost](https://www.boost.org/users/download/) >= 1.75
+* [boost](https://www.boost.org/users/download/) >= 1.76
 * [libtorrent-rasterbar](https://github.com/arvidn/libtorrent/releases) >= 1.2.14
 
 ### Components
@@ -82,7 +82,7 @@ curl http://localhost:16180/api/stats | jq
 * [Boost.Beast](https://github.com/boostorg/beast) http, websocket
 * [Boost.JSON](https://github.com/boostorg/json) new JSON relative to PropertyTree!
 * [Boost.ProgramOption](https://github.com/boostorg/program_options) config and options
-* [bmcweb](https://github.com/openbmc/bmcweb) logging
+* [plog](https://github.com/SergiusTheBest/plog) logging
 
 ## Build
 
