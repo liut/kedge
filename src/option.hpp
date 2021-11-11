@@ -13,6 +13,9 @@ namespace po = boost::program_options;
 
 namespace btd {
 
+// Forward declaration
+class sheath;
+
 void
 load_sess_params(std::string const& cd, lt::session_params& params);
 
@@ -28,6 +31,9 @@ struct option {
 
     bool
     init_from(int argc, char* argv[]);
+
+    std::shared_ptr<sheath>
+    make_context() const;
 };
 
 std::string mapper(std::string env_var)
@@ -103,6 +109,14 @@ option::init_from(int argc, char* argv[])
     }
 
     return true;
+}
+
+std::shared_ptr<sheath>
+option::make_context() const
+{
+    const auto ses = std::make_shared<lt::session>(std::move(params));
+    const auto ctx = std::make_shared<sheath>(ses, storeRoot, movedRoot);
+    return ctx;
 }
 
 void

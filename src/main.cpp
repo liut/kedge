@@ -1,15 +1,9 @@
 
 #include <atomic>
-#include <chrono>
 #include <cstdlib>
 #include <thread>
-#include <utility>
 
 #include <boost/asio/signal_set.hpp>
-
-#include <libtorrent/config.hpp>
-#include <libtorrent/session.hpp>
-#include <libtorrent/version.hpp>
 
 #include "const.hpp"
 #include "handlers.hpp"
@@ -31,15 +25,9 @@ int main(int argc, char* argv[])
     plog::init<AlertLog>(plog::debug, logAlert.c_str(), 1024*1024*64, 2); // Initialize the 2nd logger instance.
 
     option opt;
-    if (!opt.init_from(argc, argv))
-    {
-        return EXIT_FAILURE;
-    }
+    if (!opt.init_from(argc, argv)) { return EXIT_FAILURE; }
 
-    lt::session_params params;
-    const auto ses = std::make_shared<lt::session>(std::move(opt.params));
-
-    const auto ctx = std::make_shared<sheath>(ses, opt.storeRoot, opt.movedRoot);
+    const auto ctx = opt.make_context();
 
     std::thread ctx_start_loader([&ctx] {
         ctx->start();
