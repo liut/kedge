@@ -40,8 +40,11 @@ sbCall(http::request<string_body> const& req)
 
     if (uri.find("/torrent/") == 0) return handleTorrent(req, 13); // len(/api/torrent/) == 13
 
-	// TODO: more routes
-	return std::nullopt;
+    if (req.method() == verb::put && uri == "/session/toggle"sv)
+        return handleSessionToggle(req);
+
+    // TODO: more routes
+    return std::nullopt;
 }
 
 http::response<string_body>
@@ -56,6 +59,14 @@ httpCaller::
 handleSessionStats(http::request<string_body> const& req)
 {
 	return make_resp<string_body>(req, json::serialize(shth_->getSessionStats()), ctJSON);
+}
+
+http::response<string_body>
+httpCaller::
+handleSessionToggle(http::request<string_body> const& req)
+{
+    json::object ret({{"isPaused", shth_->toggle_pause_resume()}});
+    return make_resp<string_body>(req, json::serialize(ret), ctJSON);
 }
 
 http::response<string_body>
@@ -150,8 +161,18 @@ handleTorrent(http::request<string_body> const& req, size_t const offset)
 		shth_->drop_torrent(ih, ("yes" == act || "with_data" == act));
 		return make_resp_204(req);
 	}
+    if (req.method() == verb::put) {
 
-	return make_resp_400(req, "Unsupported method");
+        if ("toggle" == act || "pause" == act)
+            shth_->pause_resume_torrent(ih);
+
+        else if ("resume" == act)
+            shth_->resume_torrent(ih);
+
+        return make_resp_204(req);
+    }
+
+    return make_resp_400(req, "Unsupported method");
 }
 
 void

@@ -59,6 +59,7 @@ torrent_status_to_json_obj(lt::torrent_status const& st)
     json::object obj({
           { "added_time", st.added_time }
         , { "state", static_cast<int>(st.state) }
+        , { "flags", static_cast<int>(st.flags) }
         , { "save_path", st.save_path } // empty in get_torrent_status
         , { "name", st.name }           // empty in get_torrent_status
         , { "info_hash", to_hex(st.info_hash) }
@@ -323,6 +324,7 @@ sheath::handle_alert(lt::alert* a)
         // the alert handler for save_resume_data_alert
         // will save it to disk
         torrent_handle h = p->handle;
+        LOG_INFO << "pause " << h.info_hash() << " " << p->torrent_name();
         h.save_resume_data(torrent_handle::save_info_dict);
         ++num_outstanding_resume_data;
     }
@@ -709,28 +711,40 @@ sheath::get_torrent(lt::sha1_hash const& ih, query_flags_t flags) const
 }
 
 bool
-sheath::pause_torrent(lt::sha1_hash const& ih)
+sheath::pause_resume_torrent(lt::sha1_hash const& ih)
 {
     auto th = ses_->find_torrent(ih);
-    if (th.is_valid()) {
-        LOG_INFO << "pause " << ih;
-        th.pause(lt::torrent_handle::graceful_pause);
-        return true;
+    if (!th.is_valid()) {
+        LOG_WARNING << "invalid " << ih;
+        return false;
     }
-    LOG_WARNING << "invalid " << ih;
-    return false;
+    LOG_INFO << "pause or resume " << ih;
+    auto const& flags = th.flags();
+    if ((flags & (lt::torrent_flags::auto_managed | lt::torrent_flags::paused)) ==
+        lt::torrent_flags::paused) {
+        th.set_flags(lt::torrent_flags::auto_managed);
+    }
+    else {
+        th.unset_flags(lt::torrent_flags::auto_managed);
+        th.pause(lt::torrent_handle::graceful_pause);
+    }
+    return true;
 }
 bool
 sheath::resume_torrent(lt::sha1_hash const& ih)
 {
     auto th = ses_->find_torrent(ih);
-    if (th.is_valid()) {
-        LOG_INFO << "resume " << ih;
-        th.resume();
-        return true;
+    if (!th.is_valid()) {
+        LOG_WARNING << "invalid " << ih;
+        return false;
     }
-    LOG_WARNING << "invalid " << ih;
-    return false;
+    LOG_INFO << "force resume " << ih;
+    auto const& flags = th.flags();
+    th.set_flags(~(flags & lt::torrent_flags::auto_managed), lt::torrent_flags::auto_managed);
+    if ((flags & lt::torrent_flags::auto_managed) && (flags & lt::torrent_flags::paused)) {
+        th.resume();
+    }
+    return true;
 }
 
 bool
@@ -832,5 +846,15 @@ sheath::getSyncStats() const
     });
 }
 
+bool
+sheath::toggle_pause_resume()
+{
+    if (ses_->is_paused())
+        ses_->resume();
+    else
+        ses_->pause();
+
+    return ses_->is_paused();
+}
 
 } // namespace btd

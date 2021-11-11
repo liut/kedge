@@ -56,6 +56,9 @@ public:
     handleSessionStats(http::request<string_body> const& req);
 
     http::response<string_body>
+    handleSessionToggle(http::request<string_body> const& req);
+
+    http::response<string_body>
     handleTorrents(http::request<string_body> const& req) ;
 
     http::response<string_body>

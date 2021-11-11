@@ -31,6 +31,7 @@ struct sessionStats
     int limitDownQueue;
     int queuedTrackerAnnounces;
     bool hasIncoming;
+    bool isPaused;
     time_t uptime;
     uint64_t uptimeMs;
 
@@ -62,6 +63,7 @@ struct sessionStats
 	    if (limitUpQueue > 0) obj.emplace("limitUpQueue", limitUpQueue);
 	    if (limitDownQueue > 0) obj.emplace("limitDownQueue", limitDownQueue);
 	    if (hasIncoming) obj.emplace("hasIncoming", true);
+	    if (isPaused) obj.emplace("isPaused", true);
 	    int activeCount = numChecking + numDownloading + numSeeding;
 	    int puasedCount = numQueued + numStopped;
 	    if (activeCount > 0) obj.emplace("activeCount", activeCount);

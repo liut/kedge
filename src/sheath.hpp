@@ -77,7 +77,7 @@ struct sheath : public std::enable_shared_from_this<sheath>
     bool
     drop_torrent(lt::sha1_hash const& ih, bool const with_data);
     bool
-    pause_torrent(lt::sha1_hash const& ih);
+    pause_resume_torrent(lt::sha1_hash const& ih);
     bool
     resume_torrent(lt::sha1_hash const& ih);
 
@@ -106,6 +106,8 @@ struct sheath : public std::enable_shared_from_this<sheath>
     add_torrent(char const* buffer, int size, std::string const& save_path);
     json::value
     getSyncStats() const;
+    bool
+    toggle_pause_resume();
 
 private:
     void

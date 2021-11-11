@@ -57,6 +57,17 @@ curl -v -X DELETE http://localhost:16180/api/torrent/5e13283d8dc83894fa899b4702f
 curl -v -X DELETE http://localhost:16180/api/torrent/5e13283d8dc83894fa899b4702f114dcab6b736e/with_data
 ```
 
+### toggle session pause and resume
+```bash
+curl -v -X PUT http://localhost:16180/api/session/toggle
+```
+
+### pause and resume a torrent
+```bash
+curl -v -X PUT http://localhost:16180/api/torrent/7cf55428325617fdde910fe55b79ab72be937924/pause
+curl -v -X PUT http://localhost:16180/api/torrent/7cf55428325617fdde910fe55b79ab72be937924/resume
+```
+
 ### show session stats
 ```bash
 curl http://localhost:16180/api/stats | jq
