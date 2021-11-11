@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ctime>
-#include <deque>
 #include <filesystem>
 #include <iostream>
 #include <memory>
@@ -77,6 +76,10 @@ struct sheath : public std::enable_shared_from_this<sheath>
     exists(lt::sha1_hash const& ih);
     bool
     drop_torrent(lt::sha1_hash const& ih, bool const with_data);
+    bool
+    pause_torrent(lt::sha1_hash const& ih);
+    bool
+    resume_torrent(lt::sha1_hash const& ih);
 
     std::string
     resume_file(lt::sha1_hash const& info_hash) const;
@@ -141,8 +144,6 @@ private:
     sessionValues  svs = sessionValues();
     // all torrents
     std::unordered_map<lt::torrent_handle, lt::torrent_status> m_all_handles;
-
-    std::deque<std::string>& events;
 
     // the number of times we've asked to save resume data
     // without having received a response (successful or failure)

@@ -141,7 +141,6 @@ sheath::sheath(std::shared_ptr<lt::session> const ses, std::string store_dir, st
     , dir_resumes(dir_conf / RESUME_DIR)
     , dir_watches(dir_conf / WATCH_DIR)
     , file_ses_state(dir_conf / SESS_FILE)
-    , events(*(new std::deque<std::string>))
 {
 }
 
@@ -341,18 +340,6 @@ sheath::handle_alert(lt::alert* a)
     return false;
 }
 
-
-void
-print_alert(lt::alert const* a, std::string& str)
-{
-    str += "[";
-    str += timestamp();
-    str += "] ";
-    str += a->message();
-
-    PLOGD_(AlertLog) << a->what() << ' ' << a->message();
-}
-
 void
 sheath::pop_alerts()
 {
@@ -363,13 +350,9 @@ sheath::pop_alerts()
         if (handle_alert(a)) continue;
 
         // if we didn't handle the alert, print it to the log
-        std::string event_string;
-        print_alert(a, event_string);
-        events.push_back(event_string);
-        if (events.size() >= 20) events.pop_front();
+        PLOGD_(AlertLog) << a->what() << ' ' << a->message();
     }
 }
-
 
 json::value
 sheath::getSessionInfo() const
@@ -389,7 +372,9 @@ sheath::getSessionInfo() const
 json::value
 sheath::getSessionStats() const
 {
-    return json::value_from(svs.getSessionStats());
+    auto stats = svs.getSessionStats();
+    stats.isPaused = ses_->is_paused();
+    return json::value_from(stats);
 }
 
 void
@@ -722,14 +707,37 @@ sheath::get_torrent(lt::sha1_hash const& ih, query_flags_t flags) const
     }
     return json::value(nullptr);
 }
+
+bool
+sheath::pause_torrent(lt::sha1_hash const& ih)
+{
+    auto th = ses_->find_torrent(ih);
+    if (th.is_valid()) {
+        LOG_INFO << "pause " << ih;
+        th.pause(lt::torrent_handle::graceful_pause);
+        return true;
+    }
+    LOG_WARNING << "invalid " << ih;
+    return false;
+}
+bool
+sheath::resume_torrent(lt::sha1_hash const& ih)
+{
+    auto th = ses_->find_torrent(ih);
+    if (th.is_valid()) {
+        LOG_INFO << "resume " << ih;
+        th.resume();
+        return true;
+    }
+    LOG_WARNING << "invalid " << ih;
+    return false;
+}
+
 bool
 sheath::exists(lt::sha1_hash const& ih)
 {
     auto th = ses_->find_torrent(ih);
-    if (th.is_valid())
-    {
-        return true;
-    }
+    if (th.is_valid()) { return true; }
     return false;
 }
 
