@@ -239,7 +239,7 @@ doLoop()
     json::value jv({
         {"version", sync_ver.load()}
         ,{"delta", true}
-        ,{"body", diff(prev_stats, curr_stats)}
+        ,{"body", json_diff(prev_stats, curr_stats)}
     });
     broadcast(json::serialize(jv));
     // std::clog << sync_ver.load() << " ";
