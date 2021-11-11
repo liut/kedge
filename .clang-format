@@ -13,11 +13,19 @@ AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: WithoutElse
 AllowShortLambdasOnASingleLine: Empty
 AllowShortLoopsOnASingleLine: True
-AlwaysBreakAfterDefinitionReturnType: All
-BreakBeforeBraces: Stroustrup
+# AlwaysBreakAfterDefinitionReturnType: All
+AlwaysBreakAfterReturnType: All
+BreakBeforeBraces: Custom
 BreakConstructorInitializers: BeforeComma
 BreakInheritanceList: AfterComma
 BraceWrapping:
+  AfterEnum: true
+  AfterCaseLabel: False
+  AfterFunction: true
+  AfterNamespace: False
+  AfterStruct: true
+  BeforeCatch: true
+  BeforeElse: true
   SplitEmptyFunction: False
   SplitEmptyRecord: False
 
@@ -27,6 +35,9 @@ FixNamespaceComments: True
 IncludeBlocks: Preserve
 IndentAccessModifiers: False
 
-PenaltyReturnTypeOnItsOwnLine: 36
+# Penalties
+PenaltyBreakString: 60
+PenaltyExcessCharacter: 120
+PenaltyReturnTypeOnItsOwnLine: 16
 
 PointerAlignment: Left
