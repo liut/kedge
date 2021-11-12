@@ -166,7 +166,7 @@ handleTorrent(http::request<string_body> const& req, size_t const offset)
         if ("toggle" == act || "pause" == act)
             shth_->pause_resume_torrent(ih);
 
-        else if ("resume" == act)
+        else if ("start" == act || "resume" == act)
             shth_->resume_torrent(ih);
 
         return make_resp_204(req);
