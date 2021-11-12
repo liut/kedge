@@ -8,12 +8,14 @@ JSON APIs
 
 * `GET` `/api/session` current session information, 200
 * `GET` `/api/session/stats` statistices of session, 200
+* `PUT` `/api/session/toggle` toggle session pause and resume, 200
 * `GET` `/api/torrents` show all torrents, 200
 * `POST` `/api/torrents` new task with torrent file in body, 204 | 500
 * `GET` `/api/torrent/{infohash}` show a torrent status, 200 | 404
 * `GET` `/api/torrent/{infohash}/{act}` act=(files|peers), 200 | 404
 * `HEAD` `/api/torrent/{infohash}`, 204 | 404
 * `DELETE` `/api/torrent/{infohash}` remove a torrent, 204 | 404
+* `PUT` `/api/torrent/{infohash}/{act}` act=(toggle|start) toggle a torrent or force start, 204
 * `GET` `/api/sync` Websocket only! response using [JSON-patch](https://tools.ietf.org/html/rfc6902) format (see [velox](https://github.com/jpillora/velox)).
 
 **note: `infohash` has 40 bytes string with hex format**
@@ -60,12 +62,15 @@ curl -v -X DELETE http://localhost:16180/api/torrent/5e13283d8dc83894fa899b4702f
 ### toggle session pause and resume
 ```bash
 curl -v -X PUT http://localhost:16180/api/session/toggle
+# response {"isPaused":true} or {"isPaused":false}
 ```
 
 ### pause and resume a torrent
 ```bash
-curl -v -X PUT http://localhost:16180/api/torrent/7cf55428325617fdde910fe55b79ab72be937924/pause
-curl -v -X PUT http://localhost:16180/api/torrent/7cf55428325617fdde910fe55b79ab72be937924/resume
+# toggle a torrent puase or resume
+curl -v -X PUT http://localhost:16180/api/torrent/7cf55428325617fdde910fe55b79ab72be937924/toggle
+# force start a torrent
+curl -v -X PUT http://localhost:16180/api/torrent/7cf55428325617fdde910fe55b79ab72be937924/start
 ```
 
 ### show session stats
