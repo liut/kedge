@@ -47,6 +47,9 @@ _deps
 # macOS
 .DS_Store
 
+# vscode
+/.vscode/
+
 # compiled directory
 /build/
 /btd
@@ -64,3 +67,4 @@ Makefile
 /.env
 /kedge
 *.t?z
+/example
