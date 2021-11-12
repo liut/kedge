@@ -798,6 +798,7 @@ sheath::on_torrent_finished(lt::torrent_handle const& th)
     }
     std::error_code ec;
     if (fs::exists(dir_moved, ec)) {
+        LOG_INFO << "moving from " << st.save_path << " to " << dir_moved;
         th.move_storage(dir_moved.string(), lt::move_flags_t::dont_replace);
     }
     PLOG_WARNING_IF(ec) << "move failed " << ec.message();
