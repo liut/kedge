@@ -27,7 +27,7 @@ Plans
 * <del>Support for Add a new task by magnet link</del>.
 * <del>Support optional actions such as moving folder when task is completed</del>.
 * <del>Split logs with alert types?</del>.
-* Pause and resume torrents.
+* ~~Pause and resume torrents~~.
 
 ## API Test
 
