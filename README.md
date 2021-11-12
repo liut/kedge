@@ -35,10 +35,12 @@ Plans
 ```bash
 curl -v -X POST \
 	--data-binary @debian-10.10.0-amd64-netinst.iso.torrent \
-	-H 'x-save-path: /tmp' http://localhost:16180/api/torrents
+	-H 'x-save-path: /tmp' \
+	http://localhost:16180/api/torrents
 curl -v -X POST \
 	--data-raw 'magnet:?xt=urn:btih:LYJSQPMNZA4JJ6UJTNDQF4IU3SVWW43O&dn=debian-mac-10.10.0-amd64-netinst.iso&xl=351272960&tr=http%3A%2F%2Fbttracker.debian.org%3A6969%2Fannounce' \
-	-H 'x-magnet-link: yes' http://localhost:16180/api/torrents
+	-H 'x-magnet-link: yes' \
+	http://localhost:16180/api/torrents
 
 ```
 
@@ -47,12 +49,12 @@ curl -v -X POST \
 curl http://localhost:16180/api/torrents | jq
 ```
 
-### check a torrent exist
+### check a torrent exist with infohash
 ```bash
 curl -v -I http://localhost:16180/api/torrent/5e13283d8dc83894fa899b4702f114dcab6b736e
 ```
 
-### drop a torrent
+### drop a torrent (with data optional)
 ```bash
 curl -v -X DELETE http://localhost:16180/api/torrent/5e13283d8dc83894fa899b4702f114dcab6b736e
 # or
