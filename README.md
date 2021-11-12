@@ -29,7 +29,7 @@ Plans
 * <del>Split logs with alert types?</del>.
 * <del>Pause and resume torrents</del>.
 
-## API Test
+## API Test with cURL
 
 ### add a torrent
 ```bash
@@ -56,9 +56,11 @@ curl -v -I http://localhost:16180/api/torrent/5e13283d8dc83894fa899b4702f114dcab
 
 ### drop a torrent (with data optional)
 ```bash
-curl -v -X DELETE http://localhost:16180/api/torrent/5e13283d8dc83894fa899b4702f114dcab6b736e
+curl -v -X DELETE \
+	http://localhost:16180/api/torrent/5e13283d8dc83894fa899b4702f114dcab6b736e
 # or
-curl -v -X DELETE http://localhost:16180/api/torrent/5e13283d8dc83894fa899b4702f114dcab6b736e/with_data
+curl -v -X DELETE \
+	http://localhost:16180/api/torrent/5e13283d8dc83894fa899b4702f114dcab6b736e/with_data
 ```
 
 ### toggle session pause and resume
@@ -70,9 +72,11 @@ curl -v -X PUT http://localhost:16180/api/session/toggle
 ### pause and resume a torrent
 ```bash
 # toggle a torrent puase or resume
-curl -v -X PUT http://localhost:16180/api/torrent/7cf55428325617fdde910fe55b79ab72be937924/toggle
+curl -v -X PUT \
+	http://localhost:16180/api/torrent/7cf55428325617fdde910fe55b79ab72be937924/toggle
 # force start a torrent
-curl -v -X PUT http://localhost:16180/api/torrent/7cf55428325617fdde910fe55b79ab72be937924/start
+curl -v -X PUT \
+	http://localhost:16180/api/torrent/7cf55428325617fdde910fe55b79ab72be937924/start
 ```
 
 ### show session stats
@@ -93,13 +97,13 @@ curl http://localhost:16180/api/stats | jq
 
 ## Build
 
-### macOS
+### Prepare for macOS
 ```bash
 sudo port install cmake clang-11 llvm-11
 sudo port install zlib bzip2 openssl
 ```
 
-### debian/ubuntu
+### Prepare for debian/ubuntu
 ```bash
 sudo apt install cmake automake libtool pkg-config libgnutls28-dev libcurl4-gnutls-dev zlib1g-dev
 sudo apt install clang-11 libc++-11-dev libclang-11-dev
@@ -127,7 +131,7 @@ cd libtorrent
 /opt/boost/bin/b2 -j12 --prefix=/opt/lt12 cxxstd=17 variant=release crypto=openssl link=static runtime-link=static install
 ```
 
-### compile
+### Compile
 ```bash
 test -e build && rm -rf build
 mkdir build && cd build
@@ -135,8 +139,11 @@ cmake ..
 make -j4
 ```
 
-### test & dev
+### Run
 ```bash
+# show help
+./build/kedge -h
+# create and edit .env for config
 touch .env
 env `cat .env 2>/dev/null | xargs` ./build/kedge
 ```
