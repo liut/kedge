@@ -16,6 +16,7 @@ using namespace std::literals::string_view_literals;
 
 auto const ctJSON = "application/json"sv;
 auto const ctText = "text/plain"sv;
+auto const ctTorrent = "application/x-bittorrent"sv;
 
 auto const hdCacheControl = "no-cache, no-store, must-revalidate"sv;
 auto const hdPragma = "no-cache"sv;

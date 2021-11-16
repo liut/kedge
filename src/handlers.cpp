@@ -80,38 +80,26 @@ http::response<string_body>
 httpCaller::
 handleTorrents(http::request<string_body> const& req) // get or post
 {
-	if (req.method() == verb::get)
-	{
-		return make_resp<string_body>(req, json::serialize(shth_->get_torrents()), ctJSON);
-	}
+    if (req.method() == verb::get) {
+        return make_resp<string_body>(req, json::serialize(shth_->get_torrents()), ctJSON);
+    }
 
-	if (req.method() == verb::post)
-	{
-		PLOGD_(WebLog) << " post clen " << req.find(http::field::content_length)->value() << " bytes\n";
+	if (req.method() == verb::post) {
+		PLOGD_(WebLog) << "posted " << req.find(http::field::content_length)->value() << " bytes\n";
 		std::string dir(shth_->dir_store.string());
 		auto savePath = req.find("x-save-path");
-		if (savePath != req.end())
-		{
+		if (savePath != req.end()) {
 			dir = savePath->value();
 		}
-		auto mlink = req.find("x-magnet-link"); // is magnet link = yes
-		if (mlink != req.end())
-		{
-			std::string uri(req.body().data(), req.body().size());
-			if (shth_->add_magnet(uri))
-			{
-				return make_resp_204(req);
-			}
-			return make_resp_500(req, "failed to add");
-		}
-		const char* buf = req.body().data();
-		const int size = req.body().size();
-		PLOGD_(WebLog) << "post metainfo " << size << " bytes with save-path: '" << dir << "'\n";
-		if (shth_->add_torrent(buf, size, dir))
-		{
-			return make_resp_204(req);
-		}
-		return make_resp_500(req, "failed to add");
+        if (req[http::field::content_type] == ctTorrent) {
+            if (shth_->add_torrent(req.body().data(), req.body().size(), dir)) {
+                return make_resp_204(req);
+            }
+            return make_resp_500(req, "failed to add with metainfo");
+        }
+
+        if (shth_->add_magnet(req.body())) { return make_resp_204(req); }
+        return make_resp_500(req, "failed to add with magnet");
 	}
 
 	return make_resp_400(req, "Unsupported method");

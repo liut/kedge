@@ -430,7 +430,7 @@ sheath::add_magnet(std::string const& uri)
         LOG_ERROR << "invalid magnet link: " << uri << ' ' << ec.message();
         return false;
     }
-    LOG_DEBUG << "adding magnet: '" << uri << "'";
+    LOG_INFO << "adding magnet: '" << uri << "'";
 
     std::vector<char> resume_data;
     if (load_file(resume_file(p.info_hash), resume_data))
@@ -488,6 +488,7 @@ sheath::add_torrent(char const* buffer, int size, std::string const& save_path)
         LOG_ERROR << "failed to load torrent from buf " << size << ' ' << ec.message();
         return false;
     }
+    LOG_INFO << "adding torrent from buf: " << size << " bytes, save to: " << save_path;
 
     std::error_code ec_;
     if(!fs::create_directory(fs::path(save_path), ec_) && ec_.value() != 0) {
