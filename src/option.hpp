@@ -26,6 +26,8 @@ struct option {
     std::string movedRoot = "";
     std::string storeRoot = "";
     std::string webuiRoot = "";
+    std::string httpAddr = "127.0.0.1";
+    std::uint_least16_t httpPort = 16180;
 
 	lt::session_params params;
 
@@ -46,21 +48,29 @@ std::string mapper(std::string env_var)
    if (env_var == ENV_MOVED_ROOT) return "moved-root";
    if (env_var == ENV_STORE_ROOT) return "store-root";
    if (env_var == ENV_WEBUI_ROOT) return "webui-root";
+   if (env_var == ENV_HTTP_ADDR) return "http-addr";
+#ifndef __APPLE__
+   if (env_var == ENV_HTTP_PORT) return "http-port";
+#endif
    return "";
 }
 
 bool
-option::init_from(int argc, char* argv[])
+Option::init_from(int argc, char* argv[])
 {
     po::options_description config("configuration");
     config.add_options()
         ("help,h", "print usage message")
-        ("listens,l", po::value<std::string>(&listens)->default_value("0.0.0.0:6881"), "listen_interfaces")
+        ("listens,l", po::value<std::string>(&listens)->default_value("0.0.0.0:16188"), "listen_interfaces")
         ("moved-root", po::value<std::string>(&movedRoot), "moved root, env: " ENV_MOVED_ROOT)
         ("store-root,d", po::value<std::string>(&storeRoot)->default_value(getStoreDir()), "store root, env: " ENV_STORE_ROOT)
         ("webui-root", po::value<std::string>(&webuiRoot)->default_value(getWebUI()), "web UI root, env: " ENV_WEBUI_ROOT)
         ("peer-id", po::value<std::string>(&peerID)->default_value("-LT-"), "set prefix of fingerprint, env: " ENV_PEERID_PREFIX)
         ("dht-bootstrap-nodes", po::value<std::string>()->default_value("dht.transmissionbt.com:6881"), "a comma-separated list of Host port-pairs. env: " ENV_BOOTSTRAP_NODES)
+        ("http-addr", po::value<std::string>()->default_value("127.0.0.1"), "http listen address, env: " ENV_HTTP_ADDR)
+#ifndef __APPLE__
+        ("http-port", po::value<std::uint_least16_t>(&httpPort)->default_value(16180), "http listen port, env: " ENV_HTTP_PORT)
+#endif
         ;
 
     po::variables_map vm;
@@ -107,12 +117,16 @@ option::init_from(int argc, char* argv[])
         LOG_DEBUG << "set dht-bootstrap-nodes " << nodes;
         params.settings.set_str(settings_pack::dht_bootstrap_nodes, nodes);
     }
+    if (vm.count("http-addr"))
+    {
+    	LOG_DEBUG << "set http addr " << httpAddr;
+    }
 
     return true;
 }
 
 std::shared_ptr<sheath>
-option::make_context() const
+Option::make_context() const
 {
     const auto ses = std::make_shared<lt::session>(std::move(params));
     const auto ctx = std::make_shared<sheath>(ses, storeRoot, movedRoot);

@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
     PLOGD_(AlertLog) << "log start";
     PLOGD_(WebLog) << "log start";
 
-    option opt;
+    Option opt;
     if (!opt.init_from(argc, argv)) { return EXIT_FAILURE; }
 
     const auto ctx = opt.make_context();
@@ -46,8 +46,13 @@ int main(int argc, char* argv[])
 
     // main: web server
 
-    auto address = net::ip::make_address("127.0.0.1");
-    auto port = static_cast<std::uint16_t>(16180);
+    boost::system::error_code ec;
+    auto address = net::ip::make_address(opt.httpAddr, ec);
+    if (ec) {
+        std::cerr << "invalid addr " << opt.httpAddr << " reason " << ec.message();
+        return EXIT_FAILURE;
+    }
+    auto port = opt.httpPort;
     auto const threads = std::max<int>(1, std::thread::hardware_concurrency()/2 -1);
 
     std::cerr << "start http server on " << address << ":" << port << std::endl;
