@@ -28,6 +28,8 @@ Plans
 * <del>Support optional actions such as moving folder when task is completed</del>.
 * <del>Split logs with alert types?</del>.
 * <del>Pause and resume torrents</del>.
+* Support base32 format `infohash`.
+* API with authorization.
 
 ## API Test with cURL
 
