@@ -21,8 +21,17 @@ int main(int argc, char* argv[])
 {
     const std::string logMain(getLogsDir()+"/kedge-main.log");
     const std::string logAlert(getLogsDir()+"/kedge-alert.log");
-    plog::init(plog::debug, logMain.c_str(), 1024*1024*32, 2); // Initialize the default logger instance.
-    plog::init<AlertLog>(plog::debug, logAlert.c_str(), 1024*1024*64, 2); // Initialize the 2nd logger instance.
+    const std::string logWeb(getLogsDir()+"/kedge-web.log");
+    plog::init(plog::debug, logMain.c_str(), 1024*1024*32, 2);
+    plog::init<AlertLog>(plog::debug, logAlert.c_str(), 1024*1024*64, 2);
+    plog::init<WebLog>(plog::debug, logWeb.c_str(), 1024*1024*64, 2);
+
+    LOG_DEBUG << "init log " << logMain;
+    LOG_DEBUG << "init log " << logAlert;
+    LOG_DEBUG << "init log " << logWeb;
+
+    PLOGD_(AlertLog) << "log start";
+    PLOGD_(WebLog) << "log start";
 
     option opt;
     if (!opt.init_from(argc, argv)) { return EXIT_FAILURE; }

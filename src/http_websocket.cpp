@@ -31,7 +31,7 @@ websocket_session::
 ~websocket_session()
 {
     closed = true;
-    LOG_DEBUG << "ws destroying";
+    PLOGD_(WebLog) << "ws destroying";
     // Remove this session from the list of active sessions
     caller_->leave(this);
 }
@@ -143,12 +143,13 @@ on_write(beast::error_code ec, std::size_t)
     queue_.erase(queue_.begin());
 
     // Send the next message if any
-    if(! queue_.empty())
+    if(! queue_.empty()) {
         ws_.async_write(
             net::buffer(*queue_.front()),
             beast::bind_front_handler(
                 &websocket_session::on_write,
                 shared_from_this()));
+    }
 }
 
 void

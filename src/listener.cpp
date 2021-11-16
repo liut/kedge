@@ -1,8 +1,9 @@
 
-#include "listener.hpp"
-#include "http_session.hpp"
 #include <iostream>
 
+#include "listener.hpp"
+#include "http_session.hpp"
+#include "log.hpp"
 
 namespace btd {
 
@@ -71,7 +72,7 @@ fail(beast::error_code ec, char const* what)
     // Don't report on canceled operations
     if(ec == net::error::operation_aborted)
         return;
-    std::cerr << what << ": " << ec.message() << "\n";
+    PLOGW_(WebLog) << what << ": " << ec.message() << "\n";
 }
 
 // Handle a connection

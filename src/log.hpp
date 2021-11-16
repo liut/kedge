@@ -4,5 +4,7 @@
 
 enum // Define log instanceIds. Default is 0 and is omitted from this enum.
 {
-    AlertLog = 1
+    MainLog = 0, // default
+    AlertLog = 1,
+    WebLog = 2
 };

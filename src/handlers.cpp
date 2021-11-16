@@ -87,7 +87,7 @@ handleTorrents(http::request<string_body> const& req) // get or post
 
 	if (req.method() == verb::post)
 	{
-		LOG_DEBUG << " post clen " << req.find(http::field::content_length)->value() << " bytes\n";
+		PLOGD_(WebLog) << " post clen " << req.find(http::field::content_length)->value() << " bytes\n";
 		std::string dir(shth_->dir_store.string());
 		auto savePath = req.find("x-save-path");
 		if (savePath != req.end())
@@ -106,7 +106,7 @@ handleTorrents(http::request<string_body> const& req) // get or post
 		}
 		const char* buf = req.body().data();
 		const int size = req.body().size();
-		LOG_DEBUG << "post metainfo " << size << " bytes with save-path: '" << dir << "'\n";
+		PLOGD_(WebLog) << "post metainfo " << size << " bytes with save-path: '" << dir << "'\n";
 		if (shth_->add_torrent(buf, size, dir))
 		{
 			return make_resp_204(req);
@@ -190,7 +190,7 @@ join(websocket_session* wss)
         ,{"id", qid}
         ,{"body", curr_stats}
     });
-    LOG_DEBUG << "ws joinning " << sync_ver.load();
+    PLOGD_(WebLog) << "ws joinning " << sync_ver.load();
     wss->send(std::make_shared<std::string const>(json::serialize(jv)));
 }
 
@@ -200,7 +200,7 @@ leave(websocket_session* wss)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     sessions_.erase(wss);
-    LOG_DEBUG << "ws leaved";
+    PLOGD_(WebLog) << "ws leaved";
 }
 
 // Broadcast a message to all websocket client sessions

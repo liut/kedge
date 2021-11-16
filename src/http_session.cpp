@@ -118,7 +118,7 @@ fail(beast::error_code ec, char const* what)
     if(ec == net::error::operation_aborted)
         return;
 
-    std::cerr << what << ": " << ec.message() << "\n";
+    PLOGI_(WebLog) << what << ": " << ec.message() << "\n";
 }
 
 void

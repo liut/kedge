@@ -74,7 +74,7 @@ run(http::request<Body, http::basic_fields<Allocator>> const& req)
 {
     uri_ = {req.target().data(), req.target().size()};
     qid_ = url_decode(query_arg_one(uri_, "id="));
-    LOG_DEBUG << "ws run: '" << uri_ << "' qid: " << qid_;
+    PLOGD_(WebLog) << "ws run: '" << uri_ << "' qid: " << qid_;
     // Set suggested timeout settings for the websocket
     ws_.set_option(
         websocket::stream_base::timeout::suggested(
@@ -88,7 +88,7 @@ run(http::request<Body, http::basic_fields<Allocator>> const& req)
         }));
 
     ws_.control_callback([](auto kind, auto payload){
-        LOG_DEBUG << "ws ctl kind " << asValue(kind) << " payload " << payload;
+        PLOGD_(WebLog) << "ws ctl kind " << asValue(kind) << " payload " << payload;
     });
 
     // Accept the websocket handshake
