@@ -30,8 +30,8 @@ int main(int argc, char* argv[])
     LOG_DEBUG << "init log " << logAlert;
     LOG_DEBUG << "init log " << logWeb;
 
-    PLOGD_(AlertLog) << "log start";
-    PLOGD_(WebLog) << "log start";
+    PLOGD_(AlertLog) << "start alert log";
+    PLOGD_(WebLog) << "start http log";
 
     Option opt;
     if (!opt.init_from(argc, argv)) { return EXIT_FAILURE; }
