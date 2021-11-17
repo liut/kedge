@@ -49,7 +49,7 @@ find_package(Boost 1.76 REQUIRED COMPONENTS ${REQUIRED_BOOST_LIBRARIES})
 message(STATUS "Boost include dir: " ${Boost_INCLUDE_DIR})
 message(STATUS "Boost libraries: " ${Boost_LIBRARIES})
 
-configure_file(src/const.hpp.in ../src/const.hpp)
+configure_file(src/const.hpp.in ../include/const.hpp)
 include_directories(${PROJECT_BINARY_BIN})
 
 # include
