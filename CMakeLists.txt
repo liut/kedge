@@ -58,17 +58,7 @@ include_directories( "include" "src" ${Boost_INCLUDE_DIRS}, "deps" "deps/plog/in
 find_package(ZLIB REQUIRED)
 message(STATUS "ZLIB libraries: " ${ZLIB_LIBRARIES})
 
-set(sources
-	handlers.cpp
-	http_session.cpp
-	http_websocket.cpp
-	listener.cpp
-	main.cpp
-	sheath.cpp
-	util.cpp)
-
-list(TRANSFORM sources PREPEND "src/")
-
+file(GLOB_RECURSE sources RELATIVE ${CMAKE_SOURCE_DIR} "src/*.cpp")
 add_executable(kedge ${sources})
 
 if(NOT build_shared)
