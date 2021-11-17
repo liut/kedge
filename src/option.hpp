@@ -19,7 +19,7 @@ class sheath;
 void
 load_sess_params(std::string const& cd, lt::session_params& params);
 
-struct option {
+struct Option {
 
     std::string peerID    = "";
     std::string listens   = "";
@@ -92,16 +92,22 @@ Option::init_from(int argc, char* argv[])
     using lt::session_handle;
     using lt::settings_pack;
 
-    // std::uint16_t peerPort = parse_port(listens);
+    // config settings and log out
     if (vm.count("listens"))
     {
-        LOG_DEBUG << "set listens " << listens << '|' << vm["listens"].as<std::string>();
-        params.settings.set_str(settings_pack::listen_interfaces, vm["listens"].as<std::string>());
+        LOG_DEBUG << "set listens " << listens;
+        params.settings.set_str(settings_pack::listen_interfaces, listens);
     }
     if (vm.count("peer-id"))
     {
         LOG_DEBUG << "set peerID " << peerID;
         params.settings.set_str(settings_pack::peer_fingerprint, peerID);
+    }
+    if (vm.count("dht-bootstrap-nodes"))
+    {
+        auto nodes = vm["dht-bootstrap-nodes"].as<std::string>();
+        LOG_DEBUG << "set dht-bootstrap-nodes " << nodes;
+        params.settings.set_str(settings_pack::dht_bootstrap_nodes, nodes);
     }
     if (vm.count("moved-root"))
     {
@@ -110,12 +116,6 @@ Option::init_from(int argc, char* argv[])
     if (vm.count("store-root"))
     {
         LOG_DEBUG << "set store root " << storeRoot;
-    }
-    if (vm.count("dht-bootstrap-nodes"))
-    {
-        auto nodes = vm["dht-bootstrap-nodes"].as<std::string>();
-        LOG_DEBUG << "set dht-bootstrap-nodes " << nodes;
-        params.settings.set_str(settings_pack::dht_bootstrap_nodes, nodes);
     }
     if (vm.count("http-addr"))
     {
