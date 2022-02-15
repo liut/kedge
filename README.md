@@ -36,9 +36,11 @@ Plans
 ### add a torrent
 ```bash
 curl -v -X POST \
+	--url http://localhost:16180/api/torrents \
 	-H 'Content-Type: application/x-bittorrent' \
-	--data-binary @debian-11.1.0-amd64-netinst.iso.torrent \
-	http://localhost:16180/api/torrents
+	-H 'Content-Length: 30786' \
+	--data-binary @debian-11.1.0-amd64-netinst.iso.torrent
+
 curl -v -X POST \
 	--data-raw 'magnet:?xt=urn:btih:LYJSQPMNZA4JJ6UJTNDQF4IU3SVWW43O&dn=debian-mac-10.10.0-amd64-netinst.iso&xl=351272960&tr=http%3A%2F%2Fbttracker.debian.org%3A6969%2Fannounce' \
 	http://localhost:16180/api/torrents
