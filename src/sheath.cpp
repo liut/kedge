@@ -3,6 +3,7 @@
 #include <ctime>
 #include <filesystem>
 
+#include <boost/json/value_from.hpp>
 #include <libtorrent/add_torrent_params.hpp>
 #include <libtorrent/bencode.hpp>
 #include <libtorrent/magnet_uri.hpp>
@@ -36,7 +37,7 @@ parse_endpoint(lt::tcp::endpoint & ep, std::string addr)
             char const* ip = addr.c_str();
             int peer_port = atoi(port);
             lt::error_code ec;
-            auto host = lt::address::from_string(ip, ec);
+            auto host = boost::asio::ip::make_address(ip, ec);
             if (ec)
             {
                 LOG_ERROR << "invalid ip: " << addr;
@@ -130,7 +131,7 @@ torrent_status_to_json_obj(lt::torrent_status const& st)
 void
 tag_invoke( json::value_from_tag, json::value& jv, lt::torrent_status const& st)
 {
-    jv = json::value(torrent_status_to_json_obj(st));
+    jv = torrent_status_to_json_obj(st);
 }
 
 
@@ -376,7 +377,7 @@ sheath::getSessionStats() const
 {
     auto stats = svs.getSessionStats();
     stats.isPaused = ses_->is_paused();
-    return json::value_from(stats);
+    return stats.to_json_object();
 }
 
 void
@@ -848,7 +849,7 @@ sheath::getSyncStats() const
         allstats.emplace_back(torrent_status_to_json_obj(t.second));
     }
     return json::value({
-         {"stats", svs.getSessionStats()}
+         {"stats", svs.getSessionStats().to_json_object()}
         ,{"torrents", allstats}
     });
 }

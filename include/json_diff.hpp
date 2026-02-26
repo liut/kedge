@@ -49,7 +49,7 @@ json_diff(const json::value& source, const json::value& target, const std::strin
         const auto _tgt = target.get_object();
 
         for (auto it = _src.cbegin(); it != _src.cend(); ++it) {
-            const auto path_key = path + "/" + it->key().to_string();
+            const auto path_key = path + "/" + std::string(it->key().data(), it->key().size());
             const auto found    = _tgt.find(it->key());
             if (found != _tgt.end()) {
                 auto temp_diff = json_diff(it->value(), found->value(), path_key);
@@ -65,7 +65,7 @@ json_diff(const json::value& source, const json::value& target, const std::strin
         for (auto it = _tgt.cbegin(); it != _tgt.cend(); ++it) {
             if (_src.find(it->key()) == _src.end()) {
                 // found a key that is not in this -> add it
-                const auto path_key = path + "/" + it->key().to_string();
+                const auto path_key = path + "/" + std::string(it->key().data(), it->key().size());
                 result.push_back(
                     json::value({{"op", "add"}, {"path", path_key}, {"value", it->value()}}));
             }

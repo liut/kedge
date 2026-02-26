@@ -77,10 +77,4 @@ struct sessionStats
 
 };
 
-inline void
-tag_invoke( json::value_from_tag, json::value& jv, sessionStats const& ss )
-{
-	jv = ss.to_json_object();
-}
-
 } // namespace btd

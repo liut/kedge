@@ -104,6 +104,7 @@ curl http://localhost:16180/api/stats | jq
 ```bash
 sudo port install cmake clang-11 llvm-11
 sudo port install zlib bzip2 openssl
+sudo port install boost-181 libtorrent-rasterbar
 ```
 
 ### Prepare for debian/ubuntu
@@ -117,7 +118,7 @@ sudo apt install clang-11 libc++-11-dev libclang-11-dev
 ```bash
 echo 'using clang : 11.0 : : <cxxflags> -std=c++17 -O2 -no-pie -fPIC ;' >> ~/user-config.jam
 
-export CPPFLAGS='-std=c++17 -no-pie -fPIC'
+export CXXFLAGS='-std=c++17 -no-pie -fPIC -I/opt/boost/include '
 
 # download boost and uncompress it into ~/tmp
 cd ~/tmp/boost_1_76_0/
@@ -130,8 +131,10 @@ cd tools/build
 # donwload libtorrent and uncompress it into ~/tmp
 # Or git clone -b RC_1_2 https://github.com/arvidn/libtorrent.git
 cd libtorrent
-
-/opt/boost/bin/b2 -j12 --prefix=/opt/lt12 cxxstd=17 variant=release crypto=openssl link=static runtime-link=static install
+# ./bootstrap.sh --with-cxx-standard=17 --prefix=/opt/lt12 --with-boost=/opt/boost
+# ./bootstrap.sh --with-cxx-standard=17 --prefix=/opt/lt12 --with-boost=/opt/local/libexec/boost/1.78
+# make -j4 && make install
+# /opt/boost/bin/b2 -j12 --build-dir=build --prefix=/opt/lt12 cxxstd=17 variant=release crypto=openssl link=static runtime-link=static install
 ```
 
 ### Compile
@@ -150,4 +153,3 @@ make -j4
 touch .env
 env `cat .env 2>/dev/null | xargs` ./build/kedge
 ```
-
