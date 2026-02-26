@@ -33,6 +33,11 @@ sbCall(http::request<string_body> const& req)
 {
 	if (req.target().find("/api/") == std::string_view::npos) return std::nullopt;
 	auto uri = req.target().substr(4);
+	// Strip query string if present
+	auto query_pos = uri.find('?');
+	if (query_pos != std::string_view::npos) {
+		uri = uri.substr(0, query_pos);
+	}
 	if (req.method() == verb::get && uri == "/session"sv) return handleSessionInfo(req);
 	if (req.method() == verb::get && uri == "/session/stats"sv) return handleSessionStats(req);
 	if (req.method() == verb::get && uri == "/sync/stats"sv) return handleSyncStats(req);
@@ -112,7 +117,13 @@ httpCaller::
 handleTorrent(http::request<string_body> const& req, size_t const offset)
 {
 	// len(/api/torrent/{info_hash}/{act}?) >= 4 + 9 + 40
-	const std::string s(req.target().data(), req.target().size());
+	std::string_view target(req.target());
+	// Strip query string if present
+	auto query_pos = target.find('?');
+	if (query_pos != std::string_view::npos) {
+		target = target.substr(0, query_pos);
+	}
+	const std::string s(target);
 	const size_t ih_size = 40;
 	const size_t min_size = offset+ih_size;
 	if (s.size() < min_size) return make_resp_404(req);

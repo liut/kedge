@@ -130,7 +130,8 @@ do_read()
 
     // Apply a reasonable limit to the allowed size
     // of the body in bytes to prevent abuse.
-    parser_->body_limit(10000);
+    // 1MB limit to accommodate large torrent files
+    parser_->body_limit(1048576);
 
     // Set the timeout.
     stream_.expires_after(std::chrono::seconds(30));

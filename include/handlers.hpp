@@ -23,7 +23,7 @@ namespace btd {
 // Forward declaration
 class websocket_session;
 
-static std::atomic_uint sync_ver = 0;
+static std::atomic_uint64_t sync_ver = 0;
 
 class httpCaller : public std::enable_shared_from_this<httpCaller>
 {

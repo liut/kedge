@@ -144,8 +144,10 @@ private:
     lt::tcp::endpoint* peer_ = nullptr; // prepared peer ip:port
 
     sessionValues  svs = sessionValues();
-    // all torrents
+    // all torrents - protected by mutex_
     std::unordered_map<lt::torrent_handle, lt::torrent_status> m_all_handles;
+
+    mutable std::mutex mutex_;
 
     // the number of times we've asked to save resume data
     // without having received a response (successful or failure)

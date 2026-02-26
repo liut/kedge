@@ -613,6 +613,9 @@ sheath::end()
 json::value
 sheath::get_torrents() const
 {
+    // This function uses ses_->get_torrent_status() which returns a fresh snapshot,
+    // so we don't need to lock m_all_handles here. However, if we were to iterate
+    // over m_all_handles directly, we would need the lock.
     std::vector<lt::torrent_status> const torr = ses_->get_torrent_status(
                         [](lt::torrent_status const& st) { return true; }
                         , lt::torrent_handle::query_save_path | lt::torrent_handle::query_name);
@@ -808,7 +811,7 @@ sheath::on_torrent_finished(lt::torrent_handle const& th)
 void
 sheath::set_all_torrents(std::vector<lt::torrent_status> st)
 {
-    bool need_update = false;
+    std::lock_guard<std::mutex> lock(mutex_);
     for (lt::torrent_status& t : st)
     {
         auto j = m_all_handles.find(t.handle);
@@ -828,6 +831,7 @@ sheath::set_all_torrents(std::vector<lt::torrent_status> st)
 void
 sheath::remove_torrent_with_handle(lt::torrent_handle h)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     auto i = m_all_handles.find(h);
     if (i == m_all_handles.end()) return;
     m_all_handles.erase(i);
@@ -837,6 +841,7 @@ sheath::remove_torrent_with_handle(lt::torrent_handle h)
 json::value
 sheath::getSyncStats() const
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     json::array allstats;
     for (const auto& t : m_all_handles)
     {
